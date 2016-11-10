@@ -1,1 +1,6 @@
+# Ignore python byte-code files
 *.pyc
+
+# Ignore the data directory
+data/*
+!data/.gitkeep
