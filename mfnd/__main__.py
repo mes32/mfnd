@@ -10,46 +10,87 @@ import os
 def main():
 
     # Initialize the database
-    initDatabase()
+    databasePath = initDatabase()
 
     # While not done print status and get input
     done = False
     while (not done):
-        printStatus()
+        printStatus(databasePath)
         done = getResponse()
 
 
 def initDatabase():
-    x = 0
-    #scriptPath = os.path.dirname(os.path.realpath(__file__))
-    #databasePath = scriptPath + "/../data/todo_list.sqlite"
+    scriptPath = os.path.dirname(os.path.realpath(__file__))
+    databasePath = scriptPath + "/../data/todo_list.sqlite"
 
-    #conn = sqlite3.connect(databasePath)
-    #c = conn.cursor()
+    conn = sqlite3.connect(databasePath)
+    c = conn.cursor()
 
-    # # Create table
-    #c.execute('''CREATE TABLE stocks
-    #          (date text, trans text, symbol text, qty real, price real)''')
-        # # Insert a row of data
-    # c.execute("INSERT INTO stocks VALUES ('2006-01-05','BUY','RHAT',100,35.14)")
+    # Create table
+    sql = '''CREATE TABLE IF NOT EXISTS TodoTask (
+                 description TEXT NOT NULL, 
+                 completionStatus INT NOT NULL, 
+                 visible INT, 
+                 mode_id INT
+             );'''
+    c.execute(sql)
 
-    # # Save (commit) the changes
-    # conn.commit()
+    # Insert some sample rows
+    sql = '''INSERT INTO TodoTask (
+                 description,
+                 completionStatus
+             ) VALUES (
+                 'Put cover sheet on TPS report',
+                 0
+             );'''
+    c.execute(sql)
+    sql = '''INSERT INTO TodoTask (
+                 description,
+                 completionStatus
+             ) VALUES (
+                 'Put cover sheet on TPS report',
+                 0
+             );'''
+    c.execute(sql)
+    sql = '''INSERT INTO TodoTask (
+                 description,
+                 completionStatus
+             ) VALUES (
+                 'Put cover sheet on TPS report',
+                 0
+             );'''
+    c.execute(sql)
 
-    # # We can also close the connection if we are done with it.
-    # # Just be sure any changes have been committed or they will be lost.
-    # conn.close()
 
-def printStatus():
+    conn.commit()
+    conn.close()
+
+    return databasePath
+
+def printStatus(databasePath):
+    conn = sqlite3.connect(databasePath)
+    c = conn.cursor()
+
+    # Create table
+    sql = '''SELECT description FROM TodoTask WHERE completionStatus = 0;'''
+
+    tasks = []
+    for row in c.execute(sql):
+        tasks.append(row[0])
+    conn.commit()
+    conn.close()
+
     today = datetime.date.today()
 
     print("")
     print( today.strftime("MFND - %B %d, %Y") )
     print("")
-    print("  1. Put cover sheet on TPS report")
-    print("  2. Run 5 miles")
-    print("  3. Floss")
-    print("")
+
+    num = len(tasks)
+    if num != 0:
+        for i in range(0, num):
+            print("  " + str(i+1) + ". " + tasks[i]) 
+        print("")
 
 def getResponse():
     response = raw_input("> ")
