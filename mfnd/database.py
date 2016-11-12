@@ -54,7 +54,7 @@ class TodoDatabase:
 
         tasks = []
         for row in c.execute(sql):
-            tasks.append(row[0])
+            tasks.append(TodoTask(row[0]))
         conn.commit()
         conn.close()
 

@@ -8,6 +8,7 @@ MFND - To-do list application
 import datetime
 import os
 from database import TodoDatabase
+from todotask import TodoTask
 from parser import CommandParser
 
 
@@ -63,7 +64,7 @@ def printDB(database):
     num = len(tasks)
     if num != 0:
         for i in range(0, num):
-            print("  " + str(i+1) + ". " + tasks[i]) 
+            print('  {0}. {1}'.format(i+1, tasks[i]))
         print("")
 
 def exitApplication():

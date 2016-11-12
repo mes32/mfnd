@@ -22,7 +22,7 @@ class TodoTask:
         self.mode = 0
 
     def __str__(self):
-        if completionStatus == 0:
+        if self.completionStatus == 0:
             return self.description
-        elif completionStatus == 1:
+        elif self.completionStatus == 1:
             return "--- " + self.description + " ---"
