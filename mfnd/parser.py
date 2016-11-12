@@ -18,7 +18,9 @@ class CommandParser:
         Parse a line and set values accordingly
         """
 
+        tokens = line.split()
+
         self.done = False
-        if (line.strip().lower() == "exit"):
+        if (tokens[0].lower() == "exit"):
             self.done = True
 

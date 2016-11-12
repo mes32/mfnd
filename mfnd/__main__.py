@@ -15,14 +15,16 @@ def main():
 
     # Initialize the database
     database = initDatabase()
+    printDB(database)
 
-    # While not done print status and get next input
+    # Program main loop (REPL)
+    # Read commands from user, Evaluate commands updating database, Print current state of database, Loop until exit command 
     while (True):
-        command = displayStatus(database)
+        command = readCommand()
         if (command.done):
-            print("MFND exiting...")
-            break
-        updateStatus(command)
+            exitApplication()
+        evaluateCommand(database, command)
+        printDB(database)
 
 def initDatabase():
     """
@@ -35,9 +37,21 @@ def initDatabase():
     database = TodoDatabase(databasePath)
     return database
 
-def displayStatus(database):
+def readCommand():
     """
-    Print the current state of the to-do list and get commands entered by user
+    Read in new commands entered by the user
+    """
+
+    response = raw_input("> ")
+    command = CommandParser(response)
+    return command
+
+def evaluateCommand(database, command):
+    return
+
+def printDB(database):
+    """
+    Print the current state of the to-do list
     """
 
     today = datetime.date.today()
@@ -52,13 +66,9 @@ def displayStatus(database):
             print("  " + str(i+1) + ". " + tasks[i]) 
         print("")
 
-    response = raw_input("> ")
-    command = CommandParser(response)
-
-    return command
-
-def updateStatus(command):
-    x = 0
+def exitApplication():
+    print("MFND exiting...")
+    quit()
 
 if  __name__ =='__main__':
     main()
