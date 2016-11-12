@@ -20,3 +20,9 @@ class TodoTask:
         self.completionStatus = 0
         self.visible = True
         self.mode = 0
+
+    def __str__(self):
+        if completionStatus == 0:
+            return self.description
+        elif completionStatus == 1:
+            return "--- " + self.description + " ---"
