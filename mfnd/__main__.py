@@ -1,86 +1,45 @@
 #!/usr/bin/env python3
 """
-MFND - A simple to-do list application
+
+MFND - To-do list application
+
 """
 
 import datetime
-import sqlite3
 import os
+from database import TodoDatabase
+
 
 def main():
 
     # Initialize the database
-    databasePath = initDatabase()
+    database = initDatabase()
 
-    # While not done print status and get input
+    # While not done print status and get next input
     done = False
     while (not done):
-        printStatus(databasePath)
+        printStatus(database)
         done = getResponse()
 
 
 def initDatabase():
+    """
+    Initialize the to-do list database
+    """
+
     scriptPath = os.path.dirname(os.path.realpath(__file__))
     databasePath = scriptPath + "/../data/todo_list.sqlite"
 
-    conn = sqlite3.connect(databasePath)
-    c = conn.cursor()
+    database = TodoDatabase(databasePath)
+    return database
 
-    # Create table
-    sql = '''CREATE TABLE IF NOT EXISTS TodoTask (
-                 description TEXT NOT NULL, 
-                 completionStatus INT NOT NULL, 
-                 visible INT, 
-                 mode_id INT
-             );'''
-    c.execute(sql)
-
-    # Insert some sample rows
-    sql = '''INSERT INTO TodoTask (
-                 description,
-                 completionStatus
-             ) VALUES (
-                 'Put cover sheet on TPS report',
-                 0
-             );'''
-    c.execute(sql)
-    sql = '''INSERT INTO TodoTask (
-                 description,
-                 completionStatus
-             ) VALUES (
-                 'Put cover sheet on TPS report',
-                 0
-             );'''
-    c.execute(sql)
-    sql = '''INSERT INTO TodoTask (
-                 description,
-                 completionStatus
-             ) VALUES (
-                 'Put cover sheet on TPS report',
-                 0
-             );'''
-    c.execute(sql)
-
-
-    conn.commit()
-    conn.close()
-
-    return databasePath
-
-def printStatus(databasePath):
-    conn = sqlite3.connect(databasePath)
-    c = conn.cursor()
-
-    # Create table
-    sql = '''SELECT description FROM TodoTask WHERE completionStatus = 0;'''
-
-    tasks = []
-    for row in c.execute(sql):
-        tasks.append(row[0])
-    conn.commit()
-    conn.close()
+def printStatus(database):
+    """
+    Print the current state of the to-do list
+    """
 
     today = datetime.date.today()
+    tasks = database.getTasks()
 
     print("")
     print( today.strftime("MFND - %B %d, %Y") )
@@ -93,6 +52,10 @@ def printStatus(databasePath):
         print("")
 
 def getResponse():
+    """
+    Get command entered by user
+    """
+
     response = raw_input("> ")
     if (response == "exit"):
         print("MFND exiting...")
