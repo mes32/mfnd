@@ -18,8 +18,7 @@ def main():
     # While not done print status and get next input
     done = False
     while (not done):
-        printStatus(database)
-        done = getResponse()
+        done = displayStatus(database)
 
 
 def initDatabase():
@@ -33,9 +32,9 @@ def initDatabase():
     database = TodoDatabase(databasePath)
     return database
 
-def printStatus(database):
+def displayStatus(database):
     """
-    Print the current state of the to-do list
+    Print the current state of the to-do list and get commands entered by user
     """
 
     today = datetime.date.today()
@@ -51,17 +50,13 @@ def printStatus(database):
             print("  " + str(i+1) + ". " + tasks[i]) 
         print("")
 
-def getResponse():
-    """
-    Get command entered by user
-    """
-
     response = raw_input("> ")
     if (response == "exit"):
         print("MFND exiting...")
         return True
 
     return False
+
 
 if  __name__ =='__main__':
     main()
