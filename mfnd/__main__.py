@@ -8,6 +8,7 @@ MFND - To-do list application
 import datetime
 import os
 from database import TodoDatabase
+from parser import CommandParser
 
 
 def main():
@@ -16,10 +17,12 @@ def main():
     database = initDatabase()
 
     # While not done print status and get next input
-    done = False
-    while (not done):
-        done = displayStatus(database)
-
+    while (True):
+        command = displayStatus(database)
+        if (command.done):
+            print("MFND exiting...")
+            break
+        updateStatus(command)
 
 def initDatabase():
     """
@@ -38,12 +41,11 @@ def displayStatus(database):
     """
 
     today = datetime.date.today()
-    tasks = database.getTasks()
-
     print("")
     print( today.strftime("MFND - %B %d, %Y") )
     print("")
 
+    tasks = database.getTasks()
     num = len(tasks)
     if num != 0:
         for i in range(0, num):
@@ -51,12 +53,12 @@ def displayStatus(database):
         print("")
 
     response = raw_input("> ")
-    if (response == "exit"):
-        print("MFND exiting...")
-        return True
+    command = CommandParser(response)
 
-    return False
+    return command
 
+def updateStatus(command):
+    x = 0
 
 if  __name__ =='__main__':
     main()
