@@ -6,13 +6,12 @@ Module for a database representing the to-do list
 """
 
 import sqlite3
+from todotask import TodoTask
 
 class TodoDatabase:
     """
     Represents an SQLite database storing tasks in a to-do list
     """
-
-    databasePath = ""
 
     def __init__(self, databasePath):
         """
@@ -32,35 +31,15 @@ class TodoDatabase:
                  );'''
         c.execute(sql)
 
-        # Insert some sample rows
-        sql = '''INSERT INTO TodoTask (
-                     description,
-                     completionStatus
-                 ) VALUES (
-                     'Put cover sheet on TPS report',
-                     0
-                 );'''
-        c.execute(sql)
-        sql = '''INSERT INTO TodoTask (
-                     description,
-                     completionStatus
-                 ) VALUES (
-                     'Put cover sheet on TPS report',
-                     0
-                 );'''
-        c.execute(sql)
-        sql = '''INSERT INTO TodoTask (
-                     description,
-                     completionStatus
-                 ) VALUES (
-                     'Put cover sheet on TPS report',
-                     0
-                 );'''
-        c.execute(sql)
-
-
         conn.commit()
         conn.close()
+
+        # Insert four sample rows
+        task = TodoTask("Put cover sheet on TPS report")
+        self.insertTask(task)
+        self.insertTask(task)
+        self.insertTask(task)
+        self.insertTask(task)
 
     def getTasks(self):
         """
@@ -80,3 +59,23 @@ class TodoDatabase:
         conn.close()
 
         return tasks
+
+    def insertTask(self, task):
+        """
+        Insert a new task object into the database
+        """
+
+        conn = sqlite3.connect(self.databasePath)
+        c = conn.cursor()
+
+        sql = '''INSERT INTO TodoTask (
+                     description,
+                     completionStatus
+                 ) VALUES (
+                     \'''' + task.description + '''\',
+                     ''' + str(task.completionStatus) + '''
+                 );'''
+        c.execute(sql)
+
+        conn.commit()
+        conn.close()
