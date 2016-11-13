@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 
-Module for input commands
+Module for commands typed by the user
 
 """
 
@@ -14,9 +14,10 @@ def printHelp():
     print("    todo <description>  Add a new task with <description>")
     print("    done <number>       Mark the task at <number> as completed")
 
-def waitForUser():
+def readNext():
     response = raw_input("> ")
-    CommandParser(response).execute()
+    command = CommandParser(response)
+    return command
 
 
 class CommandParser:
@@ -60,7 +61,8 @@ class CommandParser:
         print("    # loadFromDatabase() - doing nothing")
 
     def __tryAgain(self):
-        waitForUser()
+        command = readNext()
+        command.execute()
 
     def __exitApplication(self):
         """
@@ -76,7 +78,8 @@ class CommandParser:
         """
 
         printHelp()
-        waitForUser()
+        command = readNext()
+        command.execute()
 
     def __addTodoTask(self):
         """
@@ -100,5 +103,5 @@ class CommandParser:
         printHelp()
         print("")
         print("!!! Warning unusable input: ' '")
-        waitForUser()
-
+        command = readNext()
+        command.execute()

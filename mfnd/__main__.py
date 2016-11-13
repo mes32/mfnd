@@ -8,6 +8,7 @@ MFND - To-do list application
 import datetime
 import os
 
+import commands
 from commands import CommandParser
 from database import TodoDatabase
 from todotask import TodoTask
@@ -46,9 +47,11 @@ def readCommand():
     Read in new commands entered by the user
     """
 
-    response = raw_input("> ")
-    command = CommandParser(response)
-    return command
+    # response = raw_input("> ")
+    # command = CommandParser(response)
+    # return command
+
+    return commands.readNext()
 
 def evaluateCommand(command):
     """
