@@ -7,9 +7,10 @@ MFND - To-do list application
 
 import datetime
 import os
+
+from commands import CommandType, CommandParser
 from database import TodoDatabase
 from todotask import TodoTask
-from parser import CommandParser
 
 
 def main():
@@ -22,7 +23,7 @@ def main():
     # Read commands from user, Evaluate commands updating database, Print current state of database, Loop until exit command 
     while (True):
         command = readCommand()
-        if (command.done):
+        if (command.type == CommandType.EXIT):
             exitApplication()
         evaluateCommand(database, command)
         printDB(database)
@@ -68,6 +69,10 @@ def printDB(database):
         print("")
 
 def exitApplication():
+    """
+    Exit from this application
+    """
+
     print("MFND exiting...")
     quit()
 

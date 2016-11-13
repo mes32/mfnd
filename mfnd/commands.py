@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 """
 
-Module for parsing typed input commands
+Module for input commands
 
 """
 
+class CommandType():
+    EXIT   = 1
+    HELP   = 2
+    TODO   = 3
+    REMOVE = 4
+    DONE   = 5
 
 class CommandParser:
     """
     Parse commands typed by the user to modify the to-do list
     """
-
-    done = False
 
     def __init__(self, line):
         """
@@ -20,7 +24,10 @@ class CommandParser:
 
         tokens = line.split()
 
-        self.done = False
         if (tokens[0].lower() == "exit"):
-            self.done = True
+            self.type = CommandType.EXIT
+            return
+        elif (tokens[0].lower() == "help"):
+            self.type = CommandType.HELP
+            return
 

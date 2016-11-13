@@ -22,6 +22,10 @@ class TodoTask:
         self.mode = 0
 
     def __str__(self):
+        """
+        Return a human readable str representation of this task
+        """
+
         if self.completionStatus == 0:
             return self.description
         elif self.completionStatus == 1:
