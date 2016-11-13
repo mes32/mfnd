@@ -7,59 +7,16 @@ Module for input commands
 
 #from database import TodoDatabase 
 
-def _printHelp():
+def printHelp():
     print("mfnd commands:")
     print("    exit                Exit from the program")
     print("    help                Display this help screen")
     print("    todo <description>  Add a new task with <description>")
     print("    done <number>       Mark the task at <number> as completed")
 
-def _waitForUser():
+def waitForUser():
     response = raw_input("> ")
     CommandParser(response).execute()
-
-def tryAgain():
-    _waitForUser()
-
-def exitApplication():
-    """
-    Exit from the application
-    """
-
-    print("MFND exiting ...")
-    quit()
-
-def displayHelp():
-    """
-    Display program usage
-    """
-
-    _printHelp()
-    _waitForUser()
-
-def addTodoTask():
-    """
-    Add a new task to the to-do list
-    """
-
-    print("    # addTodoTask() - doing nothing")
-
-def doneTodoTask():
-    """
-    Mark a task on the to-do list as done
-    """
-
-    print("    # doneTodoTask() - doing nothing")
-
-def unusableCommand():
-    """
-    Display a warning about unusable command
-    """
-
-    _printHelp()
-    print("")
-    print("!!! Warning unusable input: ' '")
-    _waitForUser()
 
 
 class CommandParser:
@@ -72,15 +29,6 @@ class CommandParser:
     def setDatabase(database):
         CommandParser.database = database
 
-    functionDict = {
-        'AGAIN'    : tryAgain,
-        'EXIT'     : exitApplication,
-        'HELP'     : displayHelp,
-        'TODO'     : addTodoTask,
-        'DONE'     : doneTodoTask,
-        'UNUSABLE' : unusableCommand,
-    }
-
     def __init__(self, line):
         """
         Parse a line and set values accordingly
@@ -88,19 +36,19 @@ class CommandParser:
 
         tokens = line.split()
         if (tokens == []):
-            self.function = self.functionDict['AGAIN']
+            self.executeFunc = self.__tryAgain
         elif (tokens[0].lower() == "exit"):
-            self.function = self.functionDict['EXIT']
+            self.executeFunc = self.__exitApplication
         elif (tokens[0].lower() == "help"):
-            self.function = self.functionDict['HELP']
+            self.executeFunc = self.__displayHelp
         elif (tokens[0].lower() == "todo"):
-            self.function = self.functionDict['TODO']
+            self.executeFunc = self.__addTodoTask
         else:
-            self.function = self.functionDict['UNUSABLE']
+            self.executeFunc = self.__unusableCommand
             self.input = line
 
     def execute(self):
-        self.function()
+        self.executeFunc()
 
     def undo(self):
         print("    # undo() - doing nothing")
@@ -110,3 +58,47 @@ class CommandParser:
 
     def loadFromDatabase(self):
         print("    # loadFromDatabase() - doing nothing")
+
+    def __tryAgain(self):
+        waitForUser()
+
+    def __exitApplication(self):
+        """
+        Exit from the application
+        """
+
+        print("MFND exiting ...")
+        quit()
+
+    def __displayHelp(self):
+        """
+        Display program usage
+        """
+
+        printHelp()
+        waitForUser()
+
+    def __addTodoTask(self):
+        """
+        Add a new task to the to-do list
+        """
+
+        print("    # addTodoTask() - doing nothing")
+
+    def __doneTodoTask(self):
+        """
+        Mark a task on the to-do list as done
+        """
+
+        print("    # doneTodoTask() - doing nothing")
+
+    def __unusableCommand(self):
+        """
+        Display a warning about unusable command
+        """
+
+        printHelp()
+        print("")
+        print("!!! Warning unusable input: ' '")
+        waitForUser()
+
