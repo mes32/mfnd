@@ -6,6 +6,8 @@ Module for commands typed by the user
 """
 
 import sys
+import sqlite3
+
 from database import TodoDatabase
 from todotask import TodoTask
 
@@ -74,7 +76,7 @@ class CommandParser:
             self.executeFunc = self.__addTodoTask
 
         elif tokens[0].lower() == "done" and commandPayload.isdigit():
-            self.doneNumber = int(commandPayload)
+            self.donePosition = commandPayload
             self.executeFunc = self.__doneTodoTask
 
         else:
@@ -85,6 +87,9 @@ class CommandParser:
             self.executeFunc()
         except SystemExit:
              sys.exit(0)
+        except sqlite3.Error as err:
+            print("Check 'database' module. Caught SQLite exception: " + err.args[0])
+            sys.exit(1)
         except:
             self.__unusableCommand()
 
@@ -135,7 +140,8 @@ class CommandParser:
         Mark a task on the to-do list as done
         """
 
-        print("    # doneTodoTask() - doing nothing (self.doneNumber = " + str(self.doneNumber) + ")" )
+        #self.database.doneTask(self.donePosition)
+
 
     def __unusableCommand(self):
         """
