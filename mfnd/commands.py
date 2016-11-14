@@ -33,7 +33,7 @@ def readNext():
     Read in and return the next command typed by the user
     """
 
-    response = raw_input("> ")
+    response = input("> ")
     command = CommandParser(response)
     return command
 
