@@ -45,7 +45,7 @@ class TodoDatabase:
 
         # Create a trigger to decrement TodoTask.taskOrder after DELETE
         sql = '''
-        CREATE TRIGGER IF NOT EXISTS TodoTask_insert AFTER DELETE ON TodoTask
+        CREATE TRIGGER IF NOT EXISTS TodoTask_delete AFTER DELETE ON TodoTask
         BEGIN
             UPDATE TodoTask SET taskOrder = taskOrder - 1 WHERE taskOrder > old.taskOrder;
         END;
@@ -106,7 +106,7 @@ class TodoDatabase:
                 taskOrder
             ) VALUES (
                 \'''' + str(task.description) + '''\',
-                (SELECT COUNT(*) FROM TodoTask) + 1
+                (SELECT MAX(taskOrder) FROM TodoTask) + 1
             );
             '''
         else:
@@ -136,6 +136,23 @@ class TodoDatabase:
         UPDATE TodoTask
             SET completionStatus = 1 
             WHERE taskOrder == ''' + donePosition + ''' ;
+        '''
+        c.execute(sql)
+
+        conn.commit()
+        conn.close()
+
+    def deleteTask(self, removePosition):
+        """
+        Update a task entry in the database
+        """
+
+        conn = sqlite3.connect(self.databasePath)
+        c = conn.cursor()
+
+        sql = '''
+        DELETE FROM TodoTask
+            WHERE taskOrder == ''' + removePosition + ''' ;
         '''
         c.execute(sql)
 

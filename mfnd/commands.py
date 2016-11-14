@@ -22,6 +22,7 @@ def printHelp():
     print("    help                 Display this help screen")
     print("    todo <description>   Add a new task with <description>")
     print("    done <num>           Mark the task at <num> as completed")
+    print("    remove <num>         Delete the task at <num>")
     print("    //move <num> up        Move task at <num> up one position")
     print("    //move <num> down      Move task at <num> down one position")
     print("    //move <num> top       Move task at <num> to top position")
@@ -78,6 +79,10 @@ class CommandParser:
         elif tokens[0].lower() == "done" and commandPayload.isdigit():
             self.donePosition = commandPayload
             self.executeFunc = self.__doneTodoTask
+
+        elif tokens[0].lower() == "remove" and commandPayload.isdigit():
+            self.removePosition = commandPayload
+            self.executeFunc = self.__removeTodoTask
 
         else:
             self.executeFunc = self.__unusableCommand
@@ -141,6 +146,13 @@ class CommandParser:
         """
 
         self.database.doneTask(self.donePosition)
+
+    def __removeTodoTask(self):
+        """
+        Delete a task from the to-do list
+        """
+
+        self.database.deleteTask(self.removePosition)
 
 
     def __unusableCommand(self):
