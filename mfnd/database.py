@@ -22,20 +22,41 @@ class TodoDatabase:
         conn = sqlite3.connect(databasePath)
         c = conn.cursor()
 
-        # Create table
-        sql = '''CREATE TABLE IF NOT EXISTS TodoTask (
-                     description TEXT NOT NULL, 
-                     completionStatus INT NOT NULL, 
-                     visible INT, 
-                     mode_id INT
-                 );'''
+        # Create table TodoTask
+        sql = '''
+        CREATE TABLE IF NOT EXISTS TodoTask (
+            description TEXT NOT NULL, 
+            taskOrder INT NOT NULL,
+            completionStatus INT NOT NULL DEFAULT 0, 
+            visible INT, 
+            mode_id INT
+        );
+        '''
+        c.execute(sql)
+
+        # Create a trigger to increment TodoTask.taskOrder before INSERT
+        sql = '''
+        CREATE TRIGGER IF NOT EXISTS TodoTask_insert BEFORE INSERT ON TodoTask
+        BEGIN
+            UPDATE TodoTask SET taskOrder = taskOrder + 1 WHERE taskOrder >= new.taskOrder;
+        END;
+        '''
+        c.execute(sql)
+
+        # Create a trigger to decrement TodoTask.taskOrder after DELETE
+        sql = '''
+        CREATE TRIGGER IF NOT EXISTS TodoTask_insert AFTER DELETE ON TodoTask
+        BEGIN
+            UPDATE TodoTask SET taskOrder = taskOrder - 1 WHERE taskOrder > old.taskOrder;
+        END;
+        '''
         c.execute(sql)
 
         conn.commit()
         conn.close()
 
         # Insert four sample rows
-        task = TodoTask("Put cover sheet on TPS report")
+        task = TodoTask("Put cover sheet on TPS report", 1)
         self.insertTask(task)
         self.insertTask(task)
         self.insertTask(task)
@@ -50,11 +71,11 @@ class TodoDatabase:
         c = conn.cursor()
 
         # Create table
-        sql = '''SELECT description FROM TodoTask WHERE completionStatus = 0;'''
+        sql = '''SELECT description, taskOrder FROM TodoTask ORDER BY taskOrder ASC;'''
 
         tasks = []
         for row in c.execute(sql):
-            tasks.append(TodoTask(row[0]))
+            tasks.append(TodoTask(row[0], row[1]))
         conn.commit()
         conn.close()
 
@@ -68,13 +89,26 @@ class TodoDatabase:
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
 
-        sql = '''INSERT INTO TodoTask (
-                     description,
-                     completionStatus
-                 ) VALUES (
-                     \'''' + task.description + '''\',
-                     ''' + str(task.completionStatus) + '''
-                 );'''
+        if task.taskOrder == -1:
+            sql = '''
+            INSERT INTO TodoTask (
+                description,
+                taskOrder
+            ) VALUES (
+                \'''' + str(task.description) + '''\',
+                (SELECT COUNT(*) FROM TodoTask) + 1
+            );
+            '''
+        else:
+            sql = '''
+            INSERT INTO TodoTask (
+                description,
+                taskOrder
+            ) VALUES (
+                \'''' + str(task.description) + '''\',
+                ''' + str(task.taskOrder) + '''
+            );
+            '''  
         c.execute(sql)
 
         conn.commit()

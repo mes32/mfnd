@@ -70,7 +70,7 @@ def printDB(database):
     num = len(tasks)
     if num != 0:
         for i in range(0, num):
-            print('  {0}. {1}'.format(i+1, tasks[i]))
+            print(tasks[i])
         print("")
 
 if  __name__ =='__main__':

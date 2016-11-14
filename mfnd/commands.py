@@ -16,10 +16,15 @@ def printHelp():
     """
 
     print("mfnd commands:")
-    print("    exit                Exit from the program")
-    print("    help                Display this help screen")
-    print("    todo <description>  Add a new task with <description>")
-    print("    done <number>       Mark the task at <number> as completed")
+    print("    exit                 Exit from the program")
+    print("    help                 Display this help screen")
+    print("    todo <description>   Add a new task with <description>")
+    print("    done <num>           Mark the task at <num> as completed")
+    print("    //move <num> up        Move task at <num> up one position")
+    print("    //move <num> down      Move task at <num> down one position")
+    print("    //move <num> top       Move task at <num> to top position")
+    print("    //move <num> bottom    Move task at <num> to bottom position")
+
 
 def readNext():
     """

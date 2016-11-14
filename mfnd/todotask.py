@@ -11,11 +11,12 @@ class TodoTask:
     Represents a task in the to-do list
     """
 
-    def __init__(self, description):
+    def __init__(self, description, taskOrder = -1):
         """
         Initialize a to-do list task item
         """
 
+        self.taskOrder = taskOrder
         self.description = description
         self.completionStatus = 0
         self.visible = True
@@ -27,6 +28,6 @@ class TodoTask:
         """
 
         if self.completionStatus == 0:
-            return self.description
+            return "  " + str(self.taskOrder) + ". " + self.description
         elif self.completionStatus == 1:
             return "--- " + self.description + " ---"
