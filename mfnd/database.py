@@ -71,11 +71,21 @@ class TodoDatabase:
         c = conn.cursor()
 
         # Create table
-        sql = '''SELECT description, taskOrder FROM TodoTask ORDER BY taskOrder ASC;'''
+        sql = '''
+        SELECT
+            description,
+            taskOrder,
+            completionStatus
+        FROM
+            TodoTask
+        ORDER BY
+            taskOrder ASC;
+        '''
 
         tasks = []
         for row in c.execute(sql):
-            tasks.append(TodoTask(row[0], row[1]))
+            newTask = TodoTask(row[0], row[1], row[2])
+            tasks.append(newTask)
         conn.commit()
         conn.close()
 
@@ -109,6 +119,24 @@ class TodoDatabase:
                 ''' + str(task.taskOrder) + '''
             );
             '''  
+        c.execute(sql)
+
+        conn.commit()
+        conn.close()
+
+    def doneTask(self, donePosition):
+        """
+        Update a task entry in the database
+        """
+
+        conn = sqlite3.connect(self.databasePath)
+        c = conn.cursor()
+
+        sql = '''
+        UPDATE TodoTask
+            SET completionStatus = 1 
+            WHERE taskOrder == ''' + donePosition + ''' ;
+        '''
         c.execute(sql)
 
         conn.commit()

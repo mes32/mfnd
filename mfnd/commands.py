@@ -140,7 +140,7 @@ class CommandParser:
         Mark a task on the to-do list as done
         """
 
-        #self.database.doneTask(self.donePosition)
+        self.database.doneTask(self.donePosition)
 
 
     def __unusableCommand(self):
