@@ -5,11 +5,16 @@ Module for commands typed by the user
 
 """
 
+import sys
 from database import TodoDatabase
 from todotask import TodoTask
 
 
 def printHelp():
+    """
+    Print a short help screen describing available commands
+    """
+
     print("mfnd commands:")
     print("    exit                Exit from the program")
     print("    help                Display this help screen")
@@ -17,6 +22,10 @@ def printHelp():
     print("    done <number>       Mark the task at <number> as completed")
 
 def readNext():
+    """
+    Read in and return the next command typed by the user
+    """
+
     response = raw_input("> ")
     command = CommandParser(response)
     return command
@@ -37,7 +46,15 @@ class CommandParser:
         Parse a line and set values accordingly
         """
 
+        self.line = line
+
+        commandPayload = ""
+        onFirstSpace = line.strip().split(None, 1)
+        if len(onFirstSpace) > 1:
+            commandPayload = onFirstSpace[1]
+
         tokens = line.split()
+
         if len(tokens) == 0:
             self.executeFunc = self.__tryAgain
 
@@ -47,17 +64,24 @@ class CommandParser:
         elif tokens[0].lower() == "help":
             self.executeFunc = self.__displayHelp
 
-        elif tokens[0].lower() == "todo" and len(tokens) > 1:
-            splitList = line.strip().split(None, 1)
-            self.todoDescription = splitList[1]
+        elif tokens[0].lower() == "todo" and len(commandPayload) > 0:
+            self.todoDescription = commandPayload
             self.executeFunc = self.__addTodoTask
+
+        elif tokens[0].lower() == "done" and commandPayload.isdigit():
+            self.doneNumber = int(commandPayload)
+            self.executeFunc = self.__doneTodoTask
 
         else:
             self.executeFunc = self.__unusableCommand
-            self.input = line
 
     def execute(self):
-        self.executeFunc()
+        try:
+            self.executeFunc()
+        except SystemExit:
+             sys.exit(0)
+        except:
+            self.__unusableCommand()
 
     def undo(self):
         print("    # undo() - doing nothing")
@@ -73,8 +97,8 @@ class CommandParser:
         Read in another command and evaluated it (i.e. let the user try again)
         """
 
-        command = readNext()
-        command.execute()
+        self = readNext()
+        self.execute()
 
     def __exitApplication(self):
         """
@@ -82,7 +106,7 @@ class CommandParser:
         """
 
         print("MFND exiting ...")
-        quit()
+        sys.exit(0)
 
     def __displayHelp(self):
         """
@@ -90,14 +114,14 @@ class CommandParser:
         """
 
         printHelp()
-        command = readNext()
-        command.execute()
+        self = readNext()
+        self.execute()
 
     def __addTodoTask(self):
         """
         Add a new task to the to-do list
         """
-        
+
         task = TodoTask(self.todoDescription)
         self.database.insertTask(task)
 
@@ -106,7 +130,7 @@ class CommandParser:
         Mark a task on the to-do list as done
         """
 
-        print("    # doneTodoTask() - doing nothing")
+        print("    # doneTodoTask() - doing nothing (self.doneNumber = " + str(self.doneNumber) + ")" )
 
     def __unusableCommand(self):
         """
@@ -115,6 +139,6 @@ class CommandParser:
 
         printHelp()
         print("")
-        print("!!! Warning unusable input: ' '")
-        command = readNext()
-        command.execute()
+        print("!!! Warning unusable input: '" + self.line + "'")
+        self = readNext()
+        self.execute()
