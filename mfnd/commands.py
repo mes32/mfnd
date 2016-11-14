@@ -5,7 +5,9 @@ Module for commands typed by the user
 
 """
 
-#from database import TodoDatabase 
+from database import TodoDatabase
+from todotask import TodoTask
+
 
 def printHelp():
     print("mfnd commands:")
@@ -36,14 +38,20 @@ class CommandParser:
         """
 
         tokens = line.split()
-        if (tokens == []):
+        if len(tokens) == 0:
             self.executeFunc = self.__tryAgain
-        elif (tokens[0].lower() == "exit"):
+
+        elif tokens[0].lower() == "exit":
             self.executeFunc = self.__exitApplication
-        elif (tokens[0].lower() == "help"):
+
+        elif tokens[0].lower() == "help":
             self.executeFunc = self.__displayHelp
-        elif (tokens[0].lower() == "todo"):
+
+        elif tokens[0].lower() == "todo" and len(tokens) > 1:
+            splitList = line.strip().split(None, 1)
+            self.todoDescription = splitList[1]
             self.executeFunc = self.__addTodoTask
+
         else:
             self.executeFunc = self.__unusableCommand
             self.input = line
@@ -61,6 +69,10 @@ class CommandParser:
         print("    # loadFromDatabase() - doing nothing")
 
     def __tryAgain(self):
+        """
+        Read in another command and evaluated it (i.e. let the user try again)
+        """
+
         command = readNext()
         command.execute()
 
@@ -85,8 +97,9 @@ class CommandParser:
         """
         Add a new task to the to-do list
         """
-
-        print("    # addTodoTask() - doing nothing")
+        
+        task = TodoTask(self.todoDescription)
+        self.database.insertTask(task)
 
     def __doneTodoTask(self):
         """

@@ -47,10 +47,6 @@ def readCommand():
     Read in new commands entered by the user
     """
 
-    # response = raw_input("> ")
-    # command = CommandParser(response)
-    # return command
-
     return commands.readNext()
 
 def evaluateCommand(command):
