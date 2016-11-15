@@ -5,7 +5,9 @@ Module for a database representing the to-do list
 
 """
 
+import time
 import sqlite3
+
 from todotask import TodoTask
 
 class TodoDatabase:
@@ -52,11 +54,79 @@ class TodoDatabase:
         '''
         c.execute(sql)
 
+        # Create table ConfigTime
+        sql = '''
+        CREATE TABLE IF NOT EXISTS ConfigTime (
+            id INTEGER PRIMARY KEY,
+            pumpkinTime INT NOT NULL,
+            lastInitTime INT DEFAULT 0
+        );
+        '''
+        c.execute(sql)
+
+        sql = '''
+        INSERT OR IGNORE INTO ConfigTime (
+            id,
+            pumpkinTime
+        ) VALUES (
+            1,
+            '14400'
+        );
+        '''
+        c.execute(sql)
+
+        sql = '''
+        SELECT pumpkinTime FROM ConfigTime WHERE id = 1;
+        '''
+        result = c.execute(sql)
+        result_list = result.fetchall()  
+        pumpkinTime = int(result_list[0][0])
+        print("pumpkinTime = " + str(pumpkinTime))
+
+        sql = '''
+        SELECT lastInitTime FROM ConfigTime WHERE id = 1;
+        '''
+        result = c.execute(sql)
+        result_list = result.fetchall()  
+        lastInitTime = int(result_list[0][0])
+
+        # if lastInitTime == None:
+        #     lastInitTime = 0
+        #     print("lastInitTime = " + str(lastInitTime))
+        # else:
+        #     lastInitTime = int(lastInitTime)
+        #     print("lastInitTime = " + str(lastInitTime))
+        (lastPumpkinTime, currentTime) = self.__getLastPumpkinTime(pumpkinTime)
+        #(lastPumpkinTime, currentTime) = self.__getLastPumpkinTime(14400)
+
+        sincePumpkin = int(currentTime) - int(lastPumpkinTime)
+        sinceInit = int(currentTime) - int(lastInitTime)
+
+        # print()
+        # print("currentTime = " + str(int(currentTime)))
+        # print("lastPumpkinTime = " + str(int(lastPumpkinTime)))
+        # print("lastInitTime = " + str(int(lastInitTime)))
+        # print("")
+        # print("sincePumpkin = " + str(int(sincePumpkin)))
+        # print("sinceInit = " + str(int(sinceInit)))
+
+        if sincePumpkin < sinceInit:
+            # print("*** DELETE FROM TodoTask ***")
+            sql = '''
+            DELETE FROM TodoTask;
+            '''
+            c.execute(sql)
+
+        sql = '''
+        UPDATE ConfigTime SET lastInitTime = \'''' + str(currentTime) + '''\' WHERE id = 1;
+        '''
+        c.execute(sql)
+
         conn.commit()
         conn.close()
 
         # Insert four sample rows
-        task = TodoTask("Put cover sheet on TPS report", 1)
+        task = TodoTask("Put cover sheet on TPS report")
         self.insertTask(task)
         self.insertTask(task)
         self.insertTask(task)
@@ -106,7 +176,7 @@ class TodoDatabase:
                 taskOrder
             ) VALUES (
                 \'''' + str(task.description) + '''\',
-                (SELECT MAX(taskOrder) FROM TodoTask) + 1
+                (SELECT COALESCE(MAX(taskOrder), 0) FROM TodoTask) + 1
             );
             '''
         else:
@@ -158,3 +228,16 @@ class TodoDatabase:
 
         conn.commit()
         conn.close()
+
+    def __getLastPumpkinTime(self, pumpkinTime):
+        lt = time.localtime()
+        currentTime = time.mktime(lt)
+
+        lt = time.localtime(currentTime - pumpkinTime)
+        hours = lt.tm_hour
+        mins = lt.tm_min
+        secs = lt.tm_sec
+        offSetTime = 60*60*hours + 60*mins + secs
+        lastPumpkinTime = currentTime - offSetTime
+
+        return (int(lastPumpkinTime), int(currentTime))
