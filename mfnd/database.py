@@ -64,6 +64,7 @@ class TodoDatabase:
         '''
         c.execute(sql)
 
+        # Set the default pumpkinTime, but allow the possibility it was previously configured
         sql = '''
         INSERT OR IGNORE INTO ConfigTime (
             id,
@@ -90,33 +91,22 @@ class TodoDatabase:
         result_list = result.fetchall()  
         lastInitTime = int(result_list[0][0])
 
-        # if lastInitTime == None:
-        #     lastInitTime = 0
-        #     print("lastInitTime = " + str(lastInitTime))
-        # else:
-        #     lastInitTime = int(lastInitTime)
-        #     print("lastInitTime = " + str(lastInitTime))
+        # Find the time of the most recent reset point based on the current time
         (lastPumpkinTime, currentTime) = self.__getLastPumpkinTime(pumpkinTime)
-        #(lastPumpkinTime, currentTime) = self.__getLastPumpkinTime(14400)
 
+        # Compute durations since last reset and since last database initialization
         sincePumpkin = int(currentTime) - int(lastPumpkinTime)
         sinceInit = int(currentTime) - int(lastInitTime)
 
-        # print()
-        # print("currentTime = " + str(int(currentTime)))
-        # print("lastPumpkinTime = " + str(int(lastPumpkinTime)))
-        # print("lastInitTime = " + str(int(lastInitTime)))
-        # print("")
-        # print("sincePumpkin = " + str(int(sincePumpkin)))
-        # print("sinceInit = " + str(int(sinceInit)))
-
+        # If a reset point 'pumpkin time' is more recent than the last database initialization, 
+        # it's a new day therefore delete the entire TodoTask table
         if sincePumpkin < sinceInit:
-            # print("*** DELETE FROM TodoTask ***")
             sql = '''
             DELETE FROM TodoTask;
             '''
             c.execute(sql)
 
+        # Update the time of last initialization to current time 
         sql = '''
         UPDATE ConfigTime SET lastInitTime = \'''' + str(currentTime) + '''\' WHERE id = 1;
         '''
@@ -230,14 +220,19 @@ class TodoDatabase:
         conn.close()
 
     def __getLastPumpkinTime(self, pumpkinTime):
+        """
+        Return the time of the most recent reset point (pumpkin time) and the current time it is relative to
+        """
         lt = time.localtime()
         currentTime = time.mktime(lt)
 
+        # Relative to the current time find the most recent pumpkin time (lastPumpkinTime)
+        # Based on pumpkin time as time-of-day (pumpkinTime)
         lt = time.localtime(currentTime - pumpkinTime)
         hours = lt.tm_hour
         mins = lt.tm_min
         secs = lt.tm_sec
-        offSetTime = 60*60*hours + 60*mins + secs
-        lastPumpkinTime = currentTime - offSetTime
+        secsBack = 60*60*hours + 60*mins + secs
+        lastPumpkinTime = currentTime - secsBack
 
         return (int(lastPumpkinTime), int(currentTime))
