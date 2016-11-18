@@ -10,7 +10,6 @@ import sqlite3
 
 from database import TodoDatabase
 from todotask import TodoTask
-from turtle import *
 
 
 def printHelp():
@@ -30,16 +29,6 @@ def printHelp():
     print("    //move <num> down      Move task at <num> down one position")
     print("    //move <num> top       Move task at <num> to top position")
     print("    //move <num> bottom    Move task at <num> to bottom position")
-
-
-# def readNext():
-#     """
-#     Read in and return the next command typed by the user
-#     """
-
-#     response = input("> ")
-#     command = CommandParser(response)
-#     return command
 
 
 class TodoShell(cmd.Cmd):
@@ -73,14 +62,6 @@ class TodoShell(cmd.Cmd):
 
 
 
-    #     elif tokens[0].lower() == "todo" and len(commandPayload) > 0:
-    #         self.todoDescription = commandPayload
-    #         self.executeFunc = self.__addTodoTask
-
-    #     elif tokens[0].lower() == "done" and commandPayload.isdigit():
-    #         self.donePosition = commandPayload
-    #         self.executeFunc = self.__doneTodoTask
-
     #     elif tokens[0].lower() == "remove" and commandPayload.isdigit():
     #         self.removePosition = commandPayload
     #         self.executeFunc = self.__removeTodoTask
@@ -93,7 +74,7 @@ class TodoShell(cmd.Cmd):
     #         self.executeFunc = self.__unusableCommand
 
 
-# done done remove pumpkin
+# remove pumpkin
 
     # ----- basic TodoShell commands -----
     def do_exit(self, arg):
@@ -121,32 +102,27 @@ class TodoShell(cmd.Cmd):
 
         task = TodoTask(arg)
         self.database.insertTask(task)
-
         self.__printDB()
 
-    def do_left(self, arg):
-        'Turn todo left by given number of degrees:  LEFT 90'
-        left(*parse(arg))
-    def do_goto(self, arg):
-        'Move todo to an absolute position with changing orientation.  GOTO 100 200'
-        goto(*parse(arg))
-    def do_home(self, arg):
-        'Return todo to the home position:  HOME'
-        home()
-    def do_circle(self, arg):
-        'Draw circle with given radius an options extent and steps:  CIRCLE 50'
-        circle(*parse(arg))
-    def do_position(self, arg):
-        'Print the current turle position:  POSITION'
-        print('Current position is %d %d\n' % position())
-    def do_heading(self, arg):
-        'Print the current turle heading in degrees:  HEADING'
-        print('Current heading is %d\n' % (heading(),))
-    def do_color(self, arg):
-        'Set the color:  COLOR BLUE'
-        color(arg.lower())
+    def do_done(self, arg):
+        """
+        Mark a task on the to-do list as done
+        """
+
+        self.database.doneTask(arg)
+        self.__printDB()
+
+    def do_remove(self, arg):
+        """
+        Delete a task from the to-do list
+        """
+
+        self.database.deleteTask(arg)
+        self.__printDB()
+
     def do_undo(self, arg):
         'Undo (repeatedly) the last turtle action(s):  UNDO'
+
     def do_reset(self, arg):
         'Clear the screen and return turtle to center:  RESET'
         reset()
@@ -155,24 +131,25 @@ class TodoShell(cmd.Cmd):
     def do_record(self, arg):
         'Save future commands to filename:  RECORD rose.cmd'
         self.file = open(arg, 'w')
+
     def do_playback(self, arg):
         'Playback commands from a file:  PLAYBACK rose.cmd'
         self.close()
         with open(arg) as f:
             self.cmdqueue.extend(f.read().splitlines())
+
     def precmd(self, line):
         line = line.lower()
         if self.file and 'playback' not in line:
             print(line, file=self.file)
         return line
+
     def close(self):
         if self.file:
             self.file.close()
             self.file = None
 
-
-
-
+    # ----- helper functions -----
     def execute(self):
         try:
             self.executeFunc()
@@ -209,21 +186,6 @@ class TodoShell(cmd.Cmd):
             for i in range(0, num):
                 print(tasks[i])
             print("")
-
-    def __addTodoTask(self):
-        """
-        Add a new task to the to-do list
-        """
-
-        task = TodoTask(self.todoDescription)
-        self.database.insertTask(task)
-
-    def __doneTodoTask(self):
-        """
-        Mark a task on the to-do list as done
-        """
-
-        self.database.doneTask(self.donePosition)
 
     def __removeTodoTask(self):
         """
