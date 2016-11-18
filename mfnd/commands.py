@@ -40,27 +40,13 @@ class TodoShell(cmd.Cmd):
     prompt = '> '
     file = None
 
-    database = None
-    @staticmethod
-    def setDatabase(database):
-        TodoShell.database = database
+    def __init__(self, database, completekey='tab', stdin=None, stdout=None):
+        """
+        Parse a line and set values accordingly
+        """
 
-    # def __init__(self, line):
-    #     """
-    #     Parse a line and set values accordingly
-    #     """
-
-    #     self.line = line
-
-    #     commandPayload = ""
-    #     onFirstSpace = line.strip().split(None, 1)
-    #     if len(onFirstSpace) > 1:
-    #         commandPayload = onFirstSpace[1]
-
-    #     tokens = line.split()
-
-
-
+        super().__init__(completekey, stdin, stdout)
+        self.database = database
 
 
     # ----- basic TodoShell commands -----

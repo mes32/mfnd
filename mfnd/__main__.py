@@ -17,19 +17,13 @@ def main():
 
     # Initialize the database
     database = initDatabase()
-    TodoShell.setDatabase(database)
-
-    TodoShell().cmdloop()
 
     # Program main loop (REPL)
     #   - Read commands from user
     #   - Evaluate commands updating database
     #   - Print current state of database
     #   - Loop until exit command 
-    # while (True):
-    #     command = readCommand()
-    #     evaluateCommand(command)
-    #     printDB(database)
+    TodoShell(database).cmdloop()
 
 
 def initDatabase():
