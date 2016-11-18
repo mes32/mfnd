@@ -62,15 +62,9 @@ class TodoShell(cmd.Cmd):
 
 
 
-    #     elif tokens[0].lower() == "pumpkin" and commandPayload.isdigit():
-    #         self.pumpkinTime = commandPayload
-    #         self.executeFunc = self.__setPumpkinTime 
-
     #     else:
     #         self.executeFunc = self.__unusableCommand
 
-
-# pumpkin
 
     # ----- basic TodoShell commands -----
     def do_exit(self, arg):
@@ -114,6 +108,14 @@ class TodoShell(cmd.Cmd):
         """
 
         self.database.deleteTask(arg)
+        self.__printDB()
+
+    def do_pumpkin(self, arg):
+        """
+        Set the time at which the database will clear the to-do list
+        """
+
+        self.database.configurePumpkinTime(arg)
         self.__printDB()
 
     def do_undo(self, arg):
