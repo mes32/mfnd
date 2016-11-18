@@ -62,10 +62,6 @@ class TodoShell(cmd.Cmd):
 
 
 
-    #     elif tokens[0].lower() == "remove" and commandPayload.isdigit():
-    #         self.removePosition = commandPayload
-    #         self.executeFunc = self.__removeTodoTask
-
     #     elif tokens[0].lower() == "pumpkin" and commandPayload.isdigit():
     #         self.pumpkinTime = commandPayload
     #         self.executeFunc = self.__setPumpkinTime 
@@ -74,7 +70,7 @@ class TodoShell(cmd.Cmd):
     #         self.executeFunc = self.__unusableCommand
 
 
-# remove pumpkin
+# pumpkin
 
     # ----- basic TodoShell commands -----
     def do_exit(self, arg):
@@ -186,13 +182,6 @@ class TodoShell(cmd.Cmd):
             for i in range(0, num):
                 print(tasks[i])
             print("")
-
-    def __removeTodoTask(self):
-        """
-        Delete a task from the to-do list
-        """
-
-        self.database.deleteTask(self.removePosition)
 
     def __setPumpkinTime(self):
         """
