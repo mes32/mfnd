@@ -7,10 +7,8 @@ MFND - To-do list application
 
 import os
 
-import commands
 from commands import TodoShell
 from database import TodoDatabase
-from todotask import TodoTask
 
 
 def main():
@@ -36,20 +34,6 @@ def initDatabase():
 
     database = TodoDatabase(databasePath)
     return database
-
-def readCommand():
-    """
-    Read in new commands entered by the user
-    """
-
-    return commands.readNext()
-
-def evaluateCommand(command):
-    """
-    Evaluate a previously read command to update the state of the to-do list
-    """
-
-    command.execute()
 
 if  __name__ =='__main__':
     main()
