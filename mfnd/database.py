@@ -82,7 +82,6 @@ class TodoDatabase:
         result = c.execute(sql)
         result_list = result.fetchall()  
         pumpkinTime = int(result_list[0][0])
-        print("pumpkinTime = " + str(pumpkinTime))
 
         sql = '''
         SELECT lastInitTime FROM ConfigTime WHERE id = 1;
@@ -218,6 +217,29 @@ class TodoDatabase:
 
         conn.commit()
         conn.close()
+
+    def configurePumpkinTime(self, timeInHours):
+        """
+        Configure the time of day at which the TodoTask table resets
+        """
+
+        hours = int(timeInHours[:2]) % 24
+        mins = int(timeInHours[2:]) % 60
+        timeInSecs = 60*60*hours + 60*mins
+
+        conn = sqlite3.connect(self.databasePath)
+        c = conn.cursor()
+
+        sql = '''
+        UPDATE ConfigTime SET pumpkinTime = \'''' + str(timeInSecs) + '''\' WHERE id = 1;
+        '''
+        c.execute(sql)
+
+        conn.commit()
+        conn.close()
+
+        print("New pumpkin time: " + timeInHours)
+        print()
 
     def __getLastPumpkinTime(self, pumpkinTime):
         """

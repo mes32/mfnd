@@ -5,7 +5,7 @@ Module for commands typed by the user
 
 """
 
-import sys
+import cmd, sys
 import sqlite3
 
 from database import TodoDatabase
@@ -23,6 +23,8 @@ def printHelp():
     print("    todo <description>   Add a new task with <description>")
     print("    done <num>           Mark the task at <num> as completed")
     print("    remove <num>         Delete the task at <num>")
+    print("    pumpkin <####>       Configure hour-of-day for reset of to-do list")
+    print("                         Requires 4 digits in 24-hour clock mode (default 0400)")
     print("    //move <num> up        Move task at <num> up one position")
     print("    //move <num> down      Move task at <num> down one position")
     print("    //move <num> top       Move task at <num> to top position")
@@ -39,7 +41,7 @@ def readNext():
     return command
 
 
-class CommandParser:
+class CommandParser(cmd.Cmd):
     """
     Parse commands typed by the user to modify the to-do list
     """
@@ -83,6 +85,10 @@ class CommandParser:
         elif tokens[0].lower() == "remove" and commandPayload.isdigit():
             self.removePosition = commandPayload
             self.executeFunc = self.__removeTodoTask
+
+        elif tokens[0].lower() == "pumpkin" and commandPayload.isdigit():
+            self.pumpkinTime = commandPayload
+            self.executeFunc = self.__setPumpkinTime 
 
         else:
             self.executeFunc = self.__unusableCommand
@@ -153,6 +159,13 @@ class CommandParser:
         """
 
         self.database.deleteTask(self.removePosition)
+
+    def __setPumpkinTime(self):
+        """
+        Set the reset time
+        """
+
+        self.database.configurePumpkinTime(self.pumpkinTime)
 
 
     def __unusableCommand(self):

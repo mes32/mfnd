@@ -16,6 +16,9 @@ from todotask import TodoTask
 
 def main():
 
+    #CommandParser().cmdloop()
+
+
     # Initialize the database
     database = initDatabase()
     printDB(database)
@@ -30,6 +33,7 @@ def main():
         command = readCommand()
         evaluateCommand(command)
         printDB(database)
+
 
 def initDatabase():
     """
