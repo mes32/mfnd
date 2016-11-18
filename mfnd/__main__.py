@@ -9,30 +9,28 @@ import datetime
 import os
 
 import commands
-from commands import CommandParser
+from commands import TodoShell
 from database import TodoDatabase
 from todotask import TodoTask
 
 
 def main():
 
-    #CommandParser().cmdloop()
-
-
     # Initialize the database
     database = initDatabase()
-    printDB(database)
-    CommandParser.setDatabase(database)
+    TodoShell.setDatabase(database)
+
+    TodoShell().cmdloop()
 
     # Program main loop (REPL)
     #   - Read commands from user
     #   - Evaluate commands updating database
     #   - Print current state of database
     #   - Loop until exit command 
-    while (True):
-        command = readCommand()
-        evaluateCommand(command)
-        printDB(database)
+    # while (True):
+    #     command = readCommand()
+    #     evaluateCommand(command)
+    #     printDB(database)
 
 
 def initDatabase():

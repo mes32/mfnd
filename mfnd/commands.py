@@ -10,6 +10,7 @@ import sqlite3
 
 from database import TodoDatabase
 from todotask import TodoTask
+from turtle import *
 
 
 def printHelp():
@@ -41,57 +42,143 @@ def readNext():
     return command
 
 
-class CommandParser(cmd.Cmd):
+class TodoShell(cmd.Cmd):
     """
     Parse commands typed by the user to modify the to-do list
     """
 
+    intro = 'Welcome to TodoShell.   Type help or ? to list commands.\n'
+    prompt = '> '
+    file = None
+
     database = None
     @staticmethod
     def setDatabase(database):
-        CommandParser.database = database
+        TodoShell.database = database
 
-    def __init__(self, line):
+    # def __init__(self, line):
+    #     """
+    #     Parse a line and set values accordingly
+    #     """
+
+    #     self.line = line
+
+    #     commandPayload = ""
+    #     onFirstSpace = line.strip().split(None, 1)
+    #     if len(onFirstSpace) > 1:
+    #         commandPayload = onFirstSpace[1]
+
+    #     tokens = line.split()
+
+
+
+
+    #     if len(tokens) == 0:
+    #         self.executeFunc = self.__tryAgain
+
+    #     elif tokens[0].lower() == "exit":
+    #         self.executeFunc = self.__exitApplication
+
+    #     elif tokens[0].lower() == "help":
+    #         self.executeFunc = self.__displayHelp
+
+    #     elif tokens[0].lower() == "todo" and len(commandPayload) > 0:
+    #         self.todoDescription = commandPayload
+    #         self.executeFunc = self.__addTodoTask
+
+    #     elif tokens[0].lower() == "done" and commandPayload.isdigit():
+    #         self.donePosition = commandPayload
+    #         self.executeFunc = self.__doneTodoTask
+
+    #     elif tokens[0].lower() == "remove" and commandPayload.isdigit():
+    #         self.removePosition = commandPayload
+    #         self.executeFunc = self.__removeTodoTask
+
+    #     elif tokens[0].lower() == "pumpkin" and commandPayload.isdigit():
+    #         self.pumpkinTime = commandPayload
+    #         self.executeFunc = self.__setPumpkinTime 
+
+    #     else:
+    #         self.executeFunc = self.__unusableCommand
+
+
+# exit <default> help todo done done remove pumpkin
+
+    # ----- basic TodoShell commands -----
+    def do_exit(self, arg):
         """
-        Parse a line and set values accordingly
+        Exit from the application
         """
 
-        self.line = line
+        print("MFND exiting ...")
+        self.close()
+        exit()
 
-        commandPayload = ""
-        onFirstSpace = line.strip().split(None, 1)
-        if len(onFirstSpace) > 1:
-            commandPayload = onFirstSpace[1]
+        return True
 
-        tokens = line.split()
+    def do_help(self, arg):
+        """
+        Display program usage
+        """
 
-        if len(tokens) == 0:
-            self.executeFunc = self.__tryAgain
+        printHelp()
 
-        elif tokens[0].lower() == "exit":
-            self.executeFunc = self.__exitApplication
+    def do_todo(self, arg):
+        """
+        Add a new task to the to-do list
+        """
 
-        elif tokens[0].lower() == "help":
-            self.executeFunc = self.__displayHelp
+        task = TodoTask(arg)
+        self.database.insertTask(task)
 
-        elif tokens[0].lower() == "todo" and len(commandPayload) > 0:
-            self.todoDescription = commandPayload
-            self.executeFunc = self.__addTodoTask
+    def do_left(self, arg):
+        'Turn todo left by given number of degrees:  LEFT 90'
+        left(*parse(arg))
+    def do_goto(self, arg):
+        'Move todo to an absolute position with changing orientation.  GOTO 100 200'
+        goto(*parse(arg))
+    def do_home(self, arg):
+        'Return todo to the home position:  HOME'
+        home()
+    def do_circle(self, arg):
+        'Draw circle with given radius an options extent and steps:  CIRCLE 50'
+        circle(*parse(arg))
+    def do_position(self, arg):
+        'Print the current turle position:  POSITION'
+        print('Current position is %d %d\n' % position())
+    def do_heading(self, arg):
+        'Print the current turle heading in degrees:  HEADING'
+        print('Current heading is %d\n' % (heading(),))
+    def do_color(self, arg):
+        'Set the color:  COLOR BLUE'
+        color(arg.lower())
+    def do_undo(self, arg):
+        'Undo (repeatedly) the last turtle action(s):  UNDO'
+    def do_reset(self, arg):
+        'Clear the screen and return turtle to center:  RESET'
+        reset()
 
-        elif tokens[0].lower() == "done" and commandPayload.isdigit():
-            self.donePosition = commandPayload
-            self.executeFunc = self.__doneTodoTask
+    # ----- record and playback -----
+    def do_record(self, arg):
+        'Save future commands to filename:  RECORD rose.cmd'
+        self.file = open(arg, 'w')
+    def do_playback(self, arg):
+        'Playback commands from a file:  PLAYBACK rose.cmd'
+        self.close()
+        with open(arg) as f:
+            self.cmdqueue.extend(f.read().splitlines())
+    def precmd(self, line):
+        line = line.lower()
+        if self.file and 'playback' not in line:
+            print(line, file=self.file)
+        return line
+    def close(self):
+        if self.file:
+            self.file.close()
+            self.file = None
 
-        elif tokens[0].lower() == "remove" and commandPayload.isdigit():
-            self.removePosition = commandPayload
-            self.executeFunc = self.__removeTodoTask
 
-        elif tokens[0].lower() == "pumpkin" and commandPayload.isdigit():
-            self.pumpkinTime = commandPayload
-            self.executeFunc = self.__setPumpkinTime 
 
-        else:
-            self.executeFunc = self.__unusableCommand
 
     def execute(self):
         try:
@@ -128,15 +215,6 @@ class CommandParser(cmd.Cmd):
 
         print("MFND exiting ...")
         sys.exit(0)
-
-    def __displayHelp(self):
-        """
-        Display program usage
-        """
-
-        printHelp()
-        self = readNext()
-        self.execute()
 
     def __addTodoTask(self):
         """
@@ -178,3 +256,15 @@ class CommandParser(cmd.Cmd):
         print("!!! Warning unusable input: '" + self.line + "'")
         self = readNext()
         self.execute()
+
+def parse(arg):
+    'Convert a series of zero or more numbers to an argument tuple'
+    print("--- In parse() ---")
+    a = arg.split()
+    print("a = " + str(a))
+    m = map(int, a)
+    print("m = " + str(m))
+    t = tuple(m)
+    print("t = " + str(t))
+    print("--- ---")
+    return t
