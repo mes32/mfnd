@@ -5,7 +5,6 @@ MFND - To-do list application
 
 """
 
-import datetime
 import os
 
 import commands
@@ -57,23 +56,6 @@ def evaluateCommand(command):
     """
 
     command.execute()
-
-def printDB(database):
-    """
-    Print the current state of the to-do list
-    """
-
-    today = datetime.date.today()
-    print("")
-    print( today.strftime("MFND - %B %d, %Y") )
-    print("")
-
-    tasks = database.getTasks()
-    num = len(tasks)
-    if num != 0:
-        for i in range(0, num):
-            print(tasks[i])
-        print("")
 
 if  __name__ =='__main__':
     main()

@@ -5,7 +5,7 @@ Module for commands typed by the user
 
 """
 
-import cmd, sys
+import cmd, datetime, sys
 import sqlite3
 
 from database import TodoDatabase
@@ -93,7 +93,7 @@ class TodoShell(cmd.Cmd):
     #         self.executeFunc = self.__unusableCommand
 
 
-# todo done done remove pumpkin
+# done done remove pumpkin
 
     # ----- basic TodoShell commands -----
     def do_exit(self, arg):
@@ -121,6 +121,8 @@ class TodoShell(cmd.Cmd):
 
         task = TodoTask(arg)
         self.database.insertTask(task)
+
+        self.__printDB()
 
     def do_left(self, arg):
         'Turn todo left by given number of degrees:  LEFT 90'
@@ -190,6 +192,23 @@ class TodoShell(cmd.Cmd):
 
     def loadFromDatabase(self):
         print("    # loadFromDatabase() - doing nothing")
+
+    def __printDB(self):
+        """
+        Print the current state of the to-do list
+        """
+
+        today = datetime.date.today()
+        print("")
+        print( today.strftime("MFND - %B %d, %Y") )
+        print("")
+
+        tasks = self.database.getTasks()
+        num = len(tasks)
+        if num != 0:
+            for i in range(0, num):
+                print(tasks[i])
+            print("")
 
     def __addTodoTask(self):
         """
