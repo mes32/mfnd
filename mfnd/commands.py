@@ -76,12 +76,6 @@ class TodoShell(cmd.Cmd):
     #     if len(tokens) == 0:
     #         self.executeFunc = self.__tryAgain
 
-    #     elif tokens[0].lower() == "exit":
-    #         self.executeFunc = self.__exitApplication
-
-    #     elif tokens[0].lower() == "help":
-    #         self.executeFunc = self.__displayHelp
-
     #     elif tokens[0].lower() == "todo" and len(commandPayload) > 0:
     #         self.todoDescription = commandPayload
     #         self.executeFunc = self.__addTodoTask
@@ -102,7 +96,7 @@ class TodoShell(cmd.Cmd):
     #         self.executeFunc = self.__unusableCommand
 
 
-# exit <default> help todo done done remove pumpkin
+# <default> todo done done remove pumpkin
 
     # ----- basic TodoShell commands -----
     def do_exit(self, arg):
@@ -207,14 +201,6 @@ class TodoShell(cmd.Cmd):
 
         self = readNext()
         self.execute()
-
-    def __exitApplication(self):
-        """
-        Exit from the application
-        """
-
-        print("MFND exiting ...")
-        sys.exit(0)
 
     def __addTodoTask(self):
         """
