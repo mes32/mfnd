@@ -67,6 +67,12 @@ class TodoShell(cmd.Cmd):
 
 
     # ----- basic TodoShell commands -----
+    def emptyline(self):
+        """
+        Entering an empty command just provides a fresh prompt
+        """
+        print()
+
     def do_exit(self, arg):
         """
         Exit from the application
@@ -184,13 +190,6 @@ class TodoShell(cmd.Cmd):
             for i in range(0, num):
                 print(tasks[i])
             print("")
-
-    def __setPumpkinTime(self):
-        """
-        Set the reset time
-        """
-
-        self.database.configurePumpkinTime(self.pumpkinTime)
 
 
     def __unusableCommand(self):
