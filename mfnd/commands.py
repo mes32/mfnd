@@ -36,20 +36,28 @@ class TodoShell(cmd.Cmd):
     Parse commands typed by the user to modify the to-do list
     """
 
-    intro = 'Welcome to TodoShell.   Type help or ? to list commands.\n'
     prompt = '> '
     file = None
 
-    def __init__(self, database, completekey='tab', stdin=None, stdout=None):
+    def __init__(self, database):
         """
-        Parse a line and set values accordingly
+        Initialize a shell for todo-list commands
         """
+
+        completekey = 'tab'
+        stdin = None
+        stdout = None
 
         super().__init__(completekey, stdin, stdout)
         self.database = database
 
 
     # ----- basic TodoShell commands -----
+    def cmdloop(self):
+
+        self.__printDB()
+        super().cmdloop()
+
     def emptyline(self):
         """
         Entering an empty command just provides a fresh prompt
