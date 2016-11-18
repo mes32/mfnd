@@ -62,16 +62,21 @@ class TodoShell(cmd.Cmd):
 
 
 
-    #     else:
-    #         self.executeFunc = self.__unusableCommand
-
 
     # ----- basic TodoShell commands -----
     def emptyline(self):
         """
         Entering an empty command just provides a fresh prompt
         """
-        print()
+
+    def default(self, line):
+        """
+        Display a warning about unusable command
+        """
+
+        printHelp()
+        print("")
+        print("!!! Warning unusable input: '" + line + "'")
 
     def do_exit(self, arg):
         """
@@ -191,17 +196,6 @@ class TodoShell(cmd.Cmd):
                 print(tasks[i])
             print("")
 
-
-    def __unusableCommand(self):
-        """
-        Display a warning about unusable command
-        """
-
-        printHelp()
-        print("")
-        print("!!! Warning unusable input: '" + self.line + "'")
-        self = readNext()
-        self.execute()
 
 def parse(arg):
     'Convert a series of zero or more numbers to an argument tuple'
