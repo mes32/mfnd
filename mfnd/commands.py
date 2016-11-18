@@ -32,14 +32,14 @@ def printHelp():
     print("    //move <num> bottom    Move task at <num> to bottom position")
 
 
-def readNext():
-    """
-    Read in and return the next command typed by the user
-    """
+# def readNext():
+#     """
+#     Read in and return the next command typed by the user
+#     """
 
-    response = input("> ")
-    command = CommandParser(response)
-    return command
+#     response = input("> ")
+#     command = CommandParser(response)
+#     return command
 
 
 class TodoShell(cmd.Cmd):
@@ -73,9 +73,6 @@ class TodoShell(cmd.Cmd):
 
 
 
-    #     if len(tokens) == 0:
-    #         self.executeFunc = self.__tryAgain
-
     #     elif tokens[0].lower() == "todo" and len(commandPayload) > 0:
     #         self.todoDescription = commandPayload
     #         self.executeFunc = self.__addTodoTask
@@ -96,7 +93,7 @@ class TodoShell(cmd.Cmd):
     #         self.executeFunc = self.__unusableCommand
 
 
-# <default> todo done done remove pumpkin
+# todo done done remove pumpkin
 
     # ----- basic TodoShell commands -----
     def do_exit(self, arg):
@@ -193,14 +190,6 @@ class TodoShell(cmd.Cmd):
 
     def loadFromDatabase(self):
         print("    # loadFromDatabase() - doing nothing")
-
-    def __tryAgain(self):
-        """
-        Read in another command and evaluated it (i.e. let the user try again)
-        """
-
-        self = readNext()
-        self.execute()
 
     def __addTodoTask(self):
         """
