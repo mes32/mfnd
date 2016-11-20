@@ -194,7 +194,7 @@ class TodoDatabase:
         sql = '''
         UPDATE TodoTask
             SET completionStatus = 1 
-            WHERE taskOrder == ''' + donePosition + ''' ;
+            WHERE taskOrder == ''' + str(donePosition) + ''' ;
         '''
         c.execute(sql)
 
@@ -211,7 +211,7 @@ class TodoDatabase:
 
         sql = '''
         DELETE FROM TodoTask
-            WHERE taskOrder == ''' + removePosition + ''' ;
+            WHERE taskOrder == ''' + str(removePosition) + ''' ;
         '''
         c.execute(sql)
 
@@ -243,9 +243,9 @@ class TodoDatabase:
 
     def moveUp(self, num):
         taskList = self.getTasks()
-        task = taskList[num]
-        self.deleteTask(str(num))
-        task.taskOrder -= 1
+        task = taskList[num - 1]
+        self.deleteTask(num)
+        task.taskOrder = num - 1
         self.insertTask(task)
 
 
