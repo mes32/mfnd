@@ -241,6 +241,14 @@ class TodoDatabase:
         print("New pumpkin time: " + timeInHours)
         print()
 
+    def moveUp(self, num):
+        taskList = self.getTasks()
+        task = taskList[num]
+        self.deleteTask(str(num))
+        task.taskOrder -= 1
+        self.insertTask(task)
+
+
     def __getLastPumpkinTime(self, pumpkinTime):
         """
         Return the time of the most recent reset point (pumpkin time) and the current time it is relative to

@@ -25,7 +25,7 @@ def printHelp():
     print("    remove <num>         Delete the task at <num>")
     print("    pumpkin <####>       Configure hour-of-day for reset of to-do list")
     print("                         Requires 4 digits in 24-hour clock mode (default 0400)")
-    print("    //move <num> up        Move task at <num> up one position")
+    print("    move <num> up        Move task at <num> up one position")
     print("    //move <num> down      Move task at <num> down one position")
     print("    //move <num> top       Move task at <num> to top position")
     print("    //move <num> bottom    Move task at <num> to bottom position")
@@ -38,6 +38,7 @@ class TodoShell(cmd.Cmd):
 
     prompt = '> '
     file = None
+
 
     def __init__(self, database):
         """
@@ -123,12 +124,36 @@ class TodoShell(cmd.Cmd):
         self.database.configurePumpkinTime(arg)
         self.__printDB()
 
-    def do_undo(self, arg):
-        'Undo (repeatedly) the last turtle action(s):  UNDO'
+    def do_move(self, arg):
+        """
+        Move a to-do task to another location in the list
+        """
 
-    def do_reset(self, arg):
-        'Clear the screen and return turtle to center:  RESET'
-        reset()
+        tokens = arg.split()
+        num = int(tokens[0])
+        direction = tokens[1]
+
+        if direction == "up":
+            self.database.moveUp(num)
+        else:
+            print("#    In do_move doing nothing")
+        self.__printDB()
+
+    def do_undo(self, arg):
+        """
+        Undo the last action
+        """
+        print("    # undo() - doing nothing")
+        self.__printDB()
+
+    def do_add(self, s):
+        pass
+
+    def complete_add(self, text, line, begidx, endidx):
+        mline = line.partition(' ')[2]
+        offs = len(mline) - len(text)
+        return [s[offs:] for s in completions if s.startswith(mline)]
+
 
     # ----- record and playback -----
     def do_record(self, arg):
@@ -164,13 +189,12 @@ class TodoShell(cmd.Cmd):
         except:
             self.__unusableCommand()
 
-    def undo(self):
-        print("    # undo() - doing nothing")
 
-    def saveToDatabase(self):
+
+    def __saveToDatabase(self):
         print("    # saveToDatabase() - doing nothing")
 
-    def loadFromDatabase(self):
+    def __loadFromDatabase(self):
         print("    # loadFromDatabase() - doing nothing")
 
     def __printDB(self):
@@ -190,15 +214,3 @@ class TodoShell(cmd.Cmd):
                 print(tasks[i])
             print("")
 
-
-def parse(arg):
-    'Convert a series of zero or more numbers to an argument tuple'
-    print("--- In parse() ---")
-    a = arg.split()
-    print("a = " + str(a))
-    m = map(int, a)
-    print("m = " + str(m))
-    t = tuple(m)
-    print("t = " + str(t))
-    print("--- ---")
-    return t
