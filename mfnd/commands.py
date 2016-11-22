@@ -135,6 +135,8 @@ class TodoShell(cmd.Cmd):
 
         if direction == "up":
             self.database.moveUp(num)
+        elif direction == "down":
+            self.database.moveDown(num)
         else:
             print("#    In do_move doing nothing")
         self.__printDB()

@@ -242,10 +242,25 @@ class TodoDatabase:
         print()
 
     def moveUp(self, num):
+        """
+        Move a task up one position in the to-do list
+        """
+
         taskList = self.getTasks()
         task = taskList[num - 1]
         self.deleteTask(num)
         task.taskOrder = num - 1
+        self.insertTask(task)
+
+    def moveDown(self, num):
+        """
+        Move a task down one position in the to-do list
+        """
+
+        taskList = self.getTasks()
+        task = taskList[num - 1]
+        self.deleteTask(num)
+        task.taskOrder = num + 1
         self.insertTask(task)
 
 
