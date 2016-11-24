@@ -10,6 +10,9 @@ import sqlite3
 
 from todotask import TodoTask
 
+def strForDB(string):
+    return str(string).replace(r"'", "''")
+
 class TodoDatabase:
     """
     Represents an SQLite database storing tasks in a to-do list
@@ -150,7 +153,7 @@ class TodoDatabase:
 
         return tasks
 
-    def insertTask(self, task):
+    def insertTask(self, task, num = None):
         """
         Insert a new task object into the database
         """
@@ -164,7 +167,7 @@ class TodoDatabase:
                 description,
                 taskOrder
             ) VALUES (
-                \'''' + str(task.description) + '''\',
+                \'''' + strForDB(task.description) + '''\',
                 (SELECT COALESCE(MAX(taskOrder), 0) FROM TodoTask) + 1
             );
             '''
@@ -240,6 +243,17 @@ class TodoDatabase:
 
         print("New pumpkin time: " + timeInHours)
         print()
+
+    def __moveTask(self, currentNum, newNum):
+        task = self.__getTask(currentNum)
+        self.__deleteTask(currentNum)
+        self.insertTask(task, newNum)
+
+    def __getTask(self, num):
+        return num
+
+    def __deleteTask(self, num):
+        return num
 
     def moveUp(self, num):
         """
