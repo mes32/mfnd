@@ -10,13 +10,64 @@ import sqlite3
 
 from todotask import TodoTask
 
-def strForDB(string):
+def strSQLite(string):
+    """
+    Sanitizes input for SQLite TEXT fields by converting to string and replacing 
+    each single quote (') with two single quotes ('')
+    """
+
     return str(string).replace(r"'", "''")
 
 class TodoDatabase:
     """
     Represents an SQLite database storing tasks in a to-do list
     """
+
+    CREATE_TABLE_TODOTASK = '''
+    -- Tasks to do --
+    CREATE TABLE IF NOT EXISTS TodoTask (
+        description TEXT NOT NULL, 
+        taskOrder INT NOT NULL,
+        completionStatus INT NOT NULL DEFAULT 0, 
+        visible INT, 
+        mode_id INT
+    );
+    '''
+
+    CREATE_TRIGGER_TODOTASK_INSERT = '''
+    -- Increment TodoTask.taskOrder before INSERT --
+    CREATE TRIGGER IF NOT EXISTS TodoTask_insert BEFORE INSERT ON TodoTask
+    BEGIN
+        UPDATE TodoTask SET taskOrder = taskOrder + 1 WHERE taskOrder >= new.taskOrder;
+    END;
+    '''
+
+    CREATE_TRIGGER_TODOTASK_DELETE = '''
+    -- Decrement TodoTask.taskOrder after DELETE --
+    CREATE TRIGGER IF NOT EXISTS TodoTask_delete AFTER DELETE ON TodoTask
+    BEGIN
+        UPDATE TodoTask SET taskOrder = taskOrder - 1 WHERE taskOrder > old.taskOrder;
+    END;
+    '''
+
+    CREATE_TABLE_CONFIGTIME = '''
+    CREATE TABLE IF NOT EXISTS ConfigTime (
+        id INTEGER PRIMARY KEY,
+        pumpkinTime INT NOT NULL,
+        lastInitTime INT DEFAULT 0
+    );
+    '''
+
+    SETUP_CONFIGTIME = '''
+    INSERT OR IGNORE INTO ConfigTime (
+        id,
+        pumpkinTime
+    ) VALUES (
+        1,
+        '14400'
+    );
+    '''
+
 
     def __init__(self, databasePath):
         """
@@ -28,56 +79,18 @@ class TodoDatabase:
         c = conn.cursor()
 
         # Create table TodoTask
-        sql = '''
-        CREATE TABLE IF NOT EXISTS TodoTask (
-            description TEXT NOT NULL, 
-            taskOrder INT NOT NULL,
-            completionStatus INT NOT NULL DEFAULT 0, 
-            visible INT, 
-            mode_id INT
-        );
-        '''
-        c.execute(sql)
+        c.execute(self.CREATE_TABLE_TODOTASK)
 
         # Create a trigger to increment TodoTask.taskOrder before INSERT
-        sql = '''
-        CREATE TRIGGER IF NOT EXISTS TodoTask_insert BEFORE INSERT ON TodoTask
-        BEGIN
-            UPDATE TodoTask SET taskOrder = taskOrder + 1 WHERE taskOrder >= new.taskOrder;
-        END;
-        '''
-        c.execute(sql)
+        c.execute(self.CREATE_TRIGGER_TODOTASK_INSERT)
 
         # Create a trigger to decrement TodoTask.taskOrder after DELETE
-        sql = '''
-        CREATE TRIGGER IF NOT EXISTS TodoTask_delete AFTER DELETE ON TodoTask
-        BEGIN
-            UPDATE TodoTask SET taskOrder = taskOrder - 1 WHERE taskOrder > old.taskOrder;
-        END;
-        '''
-        c.execute(sql)
+        c.execute(self.CREATE_TRIGGER_TODOTASK_DELETE)
 
         # Create table ConfigTime
-        sql = '''
-        CREATE TABLE IF NOT EXISTS ConfigTime (
-            id INTEGER PRIMARY KEY,
-            pumpkinTime INT NOT NULL,
-            lastInitTime INT DEFAULT 0
-        );
-        '''
-        c.execute(sql)
-
         # Set the default pumpkinTime, but allow the possibility it was previously configured
-        sql = '''
-        INSERT OR IGNORE INTO ConfigTime (
-            id,
-            pumpkinTime
-        ) VALUES (
-            1,
-            '14400'
-        );
-        '''
-        c.execute(sql)
+        c.execute(self.CREATE_TABLE_CONFIGTIME)
+        c.execute(self.SETUP_CONFIGTIME)
 
         sql = '''
         SELECT pumpkinTime FROM ConfigTime WHERE id = 1;
@@ -118,10 +131,13 @@ class TodoDatabase:
         conn.close()
 
         # Insert four sample rows
-        task = TodoTask("Put cover sheet on TPS report")
+        task = TodoTask("Put cover sheet on TPS report (A)")
         self.insertTask(task)
+        task = TodoTask("Put cover sheet on TPS report (B)")
         self.insertTask(task)
+        task = TodoTask("Put cover sheet on TPS report (C)")
         self.insertTask(task)
+        task = TodoTask("Put cover sheet on TPS report (D)")
         self.insertTask(task)
 
     def getTasks(self):
@@ -167,7 +183,7 @@ class TodoDatabase:
                 description,
                 taskOrder
             ) VALUES (
-                \'''' + strForDB(task.description) + '''\',
+                \'''' + strSQLite(task.description) + '''\',
                 (SELECT COALESCE(MAX(taskOrder), 0) FROM TodoTask) + 1
             );
             '''
