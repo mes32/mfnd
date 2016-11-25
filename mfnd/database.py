@@ -27,26 +27,26 @@ class TodoDatabase:
     -- Tasks to do --
     CREATE TABLE IF NOT EXISTS TodoTask (
         description TEXT NOT NULL, 
-        taskOrder INT NOT NULL,
-        completionStatus INT NOT NULL DEFAULT 0, 
+        position INT NOT NULL,
+        completionStatus TEXT NOT NULL DEFAULT 'todo', 
         visible INT, 
         mode_id INT
     );
     '''
 
     CREATE_TRIGGER_TODOTASK_INSERT = '''
-    -- Increment TodoTask.taskOrder before INSERT --
+    -- Increment TodoTask.position before INSERT --
     CREATE TRIGGER IF NOT EXISTS TodoTask_insert BEFORE INSERT ON TodoTask
     BEGIN
-        UPDATE TodoTask SET taskOrder = taskOrder + 1 WHERE taskOrder >= new.taskOrder;
+        UPDATE TodoTask SET position = position + 1 WHERE position >= new.position;
     END;
     '''
 
     CREATE_TRIGGER_TODOTASK_DELETE = '''
-    -- Decrement TodoTask.taskOrder after DELETE --
+    -- Decrement TodoTask.position after DELETE --
     CREATE TRIGGER IF NOT EXISTS TodoTask_delete AFTER DELETE ON TodoTask
     BEGIN
-        UPDATE TodoTask SET taskOrder = taskOrder - 1 WHERE taskOrder > old.taskOrder;
+        UPDATE TodoTask SET position = position - 1 WHERE position > old.position;
     END;
     '''
 
@@ -81,10 +81,10 @@ class TodoDatabase:
         # Create table TodoTask
         c.execute(self.CREATE_TABLE_TODOTASK)
 
-        # Create a trigger to increment TodoTask.taskOrder before INSERT
+        # Create a trigger to increment TodoTask.position before INSERT
         c.execute(self.CREATE_TRIGGER_TODOTASK_INSERT)
 
-        # Create a trigger to decrement TodoTask.taskOrder after DELETE
+        # Create a trigger to decrement TodoTask.position after DELETE
         c.execute(self.CREATE_TRIGGER_TODOTASK_DELETE)
 
         # Create table ConfigTime
@@ -123,7 +123,7 @@ class TodoDatabase:
 
         # Update the time of last initialization to current time 
         sql = '''
-        UPDATE ConfigTime SET lastInitTime = \'''' + str(currentTime) + '''\' WHERE id = 1;
+        UPDATE ConfigTime SET lastInitTime = \'''' + strSQLite(currentTime) + '''\' WHERE id = 1;
         '''
         c.execute(sql)
 
@@ -148,28 +148,27 @@ class TodoDatabase:
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
 
-        # Create table
         sql = '''
         SELECT
             description,
-            taskOrder,
+            position,
             completionStatus
         FROM
             TodoTask
         ORDER BY
-            taskOrder ASC;
+            position ASC;
         '''
 
         tasks = []
         for row in c.execute(sql):
-            newTask = TodoTask(row[0], row[1], row[2])
+            newTask = TodoTask(description = row[0], position = row[1], completionStatus = row[2])
             tasks.append(newTask)
         conn.commit()
         conn.close()
 
         return tasks
 
-    def insertTask(self, task, num = None):
+    def insertTask(self, task, position = None):
         """
         Insert a new task object into the database
         """
@@ -177,24 +176,24 @@ class TodoDatabase:
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
 
-        if task.taskOrder == -1:
+        if position == None:
             sql = '''
             INSERT INTO TodoTask (
                 description,
-                taskOrder
+                position
             ) VALUES (
                 \'''' + strSQLite(task.description) + '''\',
-                (SELECT COALESCE(MAX(taskOrder), 0) FROM TodoTask) + 1
+                (SELECT COALESCE(MAX(position), 0) FROM TodoTask) + 1
             );
             '''
         else:
             sql = '''
             INSERT INTO TodoTask (
                 description,
-                taskOrder
+                position
             ) VALUES (
-                \'''' + str(task.description) + '''\',
-                ''' + str(task.taskOrder) + '''
+                \'''' + strSQLite(task.description) + '''\',
+                ''' + strSQLite(position) + '''
             );
             '''  
         c.execute(sql)
@@ -202,7 +201,7 @@ class TodoDatabase:
         conn.commit()
         conn.close()
 
-    def doneTask(self, donePosition):
+    def doneTask(self, position):
         """
         Update a task entry in the database
         """
@@ -212,15 +211,15 @@ class TodoDatabase:
 
         sql = '''
         UPDATE TodoTask
-            SET completionStatus = 1 
-            WHERE taskOrder == ''' + str(donePosition) + ''' ;
+            SET completionStatus = 'done'
+            WHERE position == ''' + strSQLite(position) + ''' ;
         '''
         c.execute(sql)
 
         conn.commit()
         conn.close()
 
-    def deleteTask(self, removePosition):
+    def deleteTask(self, position):
         """
         Update a task entry in the database
         """
@@ -230,7 +229,7 @@ class TodoDatabase:
 
         sql = '''
         DELETE FROM TodoTask
-            WHERE taskOrder == ''' + str(removePosition) + ''' ;
+            WHERE position == ''' + strSQLite(position) + ''' ;
         '''
         c.execute(sql)
 
@@ -250,7 +249,7 @@ class TodoDatabase:
         c = conn.cursor()
 
         sql = '''
-        UPDATE ConfigTime SET pumpkinTime = \'''' + str(timeInSecs) + '''\' WHERE id = 1;
+        UPDATE ConfigTime SET pumpkinTime = \'''' + strSQLite(timeInSecs) + '''\' WHERE id = 1;
         '''
         c.execute(sql)
 
@@ -260,39 +259,69 @@ class TodoDatabase:
         print("New pumpkin time: " + timeInHours)
         print()
 
-    def __moveTask(self, currentNum, newNum):
-        task = self.__getTask(currentNum)
-        self.__deleteTask(currentNum)
-        self.insertTask(task, newNum)
+    def moveTask(self, currPosition, newPosition):
+        """
+        Move a task in the to-do list to a new position
+        """
 
-    def __getTask(self, num):
-        return num
+        task = self.getTask(currPosition)
+        self.deleteTask(currPosition)
+        self.insertTask(task, newPosition)
 
-    def __deleteTask(self, num):
-        return num
+    def getTask(self, position):
+        """
+        Get a task from the to-do list based on it's position
+        """
 
-    def moveUp(self, num):
+        conn = sqlite3.connect(self.databasePath)
+        c = conn.cursor()
+
+        sql = '''
+        SELECT
+            description,
+            position,
+            completionStatus
+        FROM
+            TodoTask
+        WHERE
+            position = ''' + strSQLite(position) + ''';
+        '''
+
+        for row in c.execute(sql):
+            task = TodoTask(description = row[0], position = row[1], completionStatus = row[2])
+            break
+        conn.commit()
+        conn.close()
+
+        return task
+
+    def moveUp(self, position):
         """
         Move a task up one position in the to-do list
         """
 
-        taskList = self.getTasks()
-        task = taskList[num - 1]
-        self.deleteTask(num)
-        task.taskOrder = num - 1
-        self.insertTask(task)
+        self.moveTask(position, position - 1)
 
-    def moveDown(self, num):
+    def moveDown(self, position):
         """
         Move a task down one position in the to-do list
         """
 
-        taskList = self.getTasks()
-        task = taskList[num - 1]
-        self.deleteTask(num)
-        task.taskOrder = num + 1
-        self.insertTask(task)
+        self.moveTask(position, position + 1)
 
+    def moveTop(self, position):
+        """
+        Move a task to the top of the to-do list
+        """
+
+        self.moveTask(position, 1)
+
+    def moveBottom(self, position):
+        """
+        Move a task to the bottom of the to-do list
+        """
+
+        self.moveTask(position, None)
 
     def __getLastPumpkinTime(self, pumpkinTime):
         """

@@ -26,9 +26,9 @@ def printHelp():
     print("    pumpkin <####>       Configure hour-of-day for reset of to-do list")
     print("                         Requires 4 digits in 24-hour clock mode (default 0400)")
     print("    move <num> up        Move task at <num> up one position")
-    print("    //move <num> down      Move task at <num> down one position")
-    print("    //move <num> top       Move task at <num> to top position")
-    print("    //move <num> bottom    Move task at <num> to bottom position")
+    print("    move <num> down      Move task at <num> down one position")
+    print("    move <num> top       Move task at <num> to top position")
+    print("    move <num> bottom    Move task at <num> to bottom position")
 
 
 class TodoShell(cmd.Cmd):
@@ -133,10 +133,14 @@ class TodoShell(cmd.Cmd):
         num = int(tokens[0])
         direction = tokens[1]
 
-        if direction == "up":
+        if direction == 'up':
             self.database.moveUp(num)
-        elif direction == "down":
+        elif direction == 'down':
             self.database.moveDown(num)
+        elif direction == 'top':
+            self.database.moveTop(num)
+        elif direction == 'bottom':
+            self.database.moveBottom(num)
         else:
             print("#    In do_move doing nothing")
         self.__printDB()
