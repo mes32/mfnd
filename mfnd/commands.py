@@ -56,8 +56,11 @@ class TodoShell(cmd.Cmd):
     # ----- basic TodoShell commands -----
     def cmdloop(self):
 
-        self.__printDB()
-        super().cmdloop()
+        try:
+            self.__printDB()
+            super().cmdloop()
+        except Exception:
+            self.default()
 
     def emptyline(self):
         """
@@ -142,7 +145,8 @@ class TodoShell(cmd.Cmd):
         elif direction == 'bottom':
             self.database.moveBottom(num)
         else:
-            print("#    In do_move doing nothing")
+            self.default('')
+            return
         self.__printDB()
 
     def do_undo(self, arg):
@@ -193,7 +197,7 @@ class TodoShell(cmd.Cmd):
             print("Check 'database' module. Caught SQLite exception: " + err.args[0])
             sys.exit(1)
         except:
-            self.__unusableCommand()
+            self.default('')
 
 
 
