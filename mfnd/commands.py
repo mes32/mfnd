@@ -18,17 +18,20 @@ def printHelp():
     """
 
     print("mfnd commands:")
-    print("    exit                 Exit from the program")
-    print("    help                 Display this help screen")
+    print("    exit               Exit from the program")
+    print("    help               Display this help screen")
+    print("    pumpkin <####>     Configure hour-of-day for reset of to-do list")
+    print("                       Requires 4 digits in 24-hour clock mode (default 0400)")
+    print()
     print("    todo <description>   Add a new task with <description>")
-    print("    done <num>           Mark the task at <num> as completed")
-    print("    remove <num>         Delete the task at <num>")
-    print("    pumpkin <####>       Configure hour-of-day for reset of to-do list")
-    print("                         Requires 4 digits in 24-hour clock mode (default 0400)")
-    print("    move <num> up        Move task at <num> up one position")
-    print("    move <num> down      Move task at <num> down one position")
-    print("    move <num> top       Move task at <num> to top position")
-    print("    move <num> bottom    Move task at <num> to bottom position")
+    print("    //todosub <P> <description>  Add a sub-task under the task at position <P>")
+    print("    done <P>           Mark the task at <P> as complete")
+    print("    remove <P>         Delete the task at <P>")
+    print()
+    print("    move <P> up        Move task at <P> up one position")
+    print("    move <P> down      Move task at <P> down one position")
+    print("    move <P> top       Move task at <P> to top position")
+    print("    move <P> bottom    Move task at <P> to bottom position")
 
 
 class TodoShell(cmd.Cmd):
@@ -67,14 +70,17 @@ class TodoShell(cmd.Cmd):
         Entering an empty command just provides a fresh prompt
         """
 
-    def default(self, line):
+    def default(self, line = None):
         """
         Display a warning about unusable command
         """
 
         printHelp()
-        print("")
-        print("!!! Warning unusable input: '" + line + "'")
+        print()
+        if line != None:
+            print("!!! Warning unusable input: '" + line + "'")
+        else:
+            print("!!! Warning unusable input")
 
     def do_exit(self, arg):
         """
@@ -102,6 +108,15 @@ class TodoShell(cmd.Cmd):
         task = TodoTask(arg)
         self.database.insertTask(task)
         self.__printDB()
+
+    def do_todosub(self, arg):
+        """
+        Add a new sub-task under another task
+        """
+
+        #task = TodoTask(arg)
+        #self.database.insertSubtask(task)
+        self.__printDB()   
 
     def do_done(self, arg):
         """
@@ -145,7 +160,7 @@ class TodoShell(cmd.Cmd):
         elif direction == 'bottom':
             self.database.moveBottom(num)
         else:
-            self.default('')
+            self.default()
             return
         self.__printDB()
 
@@ -197,7 +212,7 @@ class TodoShell(cmd.Cmd):
             print("Check 'database' module. Caught SQLite exception: " + err.args[0])
             sys.exit(1)
         except:
-            self.default('')
+            self.default()
 
 
 
@@ -213,14 +228,14 @@ class TodoShell(cmd.Cmd):
         """
 
         today = datetime.date.today()
-        print("")
+        print()
         print( today.strftime("MFND - %B %d, %Y") )
-        print("")
+        print()
 
         tasks = self.database.getTasks()
         num = len(tasks)
         if num != 0:
             for i in range(0, num):
                 print(tasks[i])
-            print("")
+            print()
 

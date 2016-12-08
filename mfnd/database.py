@@ -26,11 +26,21 @@ class TodoDatabase:
     CREATE_TABLE_TODOTASK = '''
     -- Tasks to do --
     CREATE TABLE IF NOT EXISTS TodoTask (
+        rowid INTEGER PRIMARY KEY,
         description TEXT NOT NULL, 
         position INT NOT NULL,
         completionStatus TEXT NOT NULL DEFAULT 'todo', 
         visible INT, 
         mode_id INT
+    );
+    '''
+
+    CREATE_TABLE_CLOSURETABLE = '''
+    -- Closure Table of Tasks --
+    CREATE TABLE IF NOT EXISTS ClosureTable (
+        parent INT NOT NULL, 
+        child INT NOT NULL,
+        depth INT NOT NULL
     );
     '''
 
@@ -80,6 +90,9 @@ class TodoDatabase:
 
         # Create table TodoTask
         c.execute(self.CREATE_TABLE_TODOTASK)
+
+        # Create table ClosureTable
+        c.execute(self.CREATE_TABLE_CLOSURETABLE)
 
         # Create a trigger to increment TodoTask.position before INSERT
         c.execute(self.CREATE_TRIGGER_TODOTASK_INSERT)
