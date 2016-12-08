@@ -38,9 +38,11 @@ class TodoDatabase:
     CREATE_TABLE_CLOSURETABLE = '''
     -- Closure Table of Tasks --
     CREATE TABLE IF NOT EXISTS ClosureTable (
-        parent INT NOT NULL, 
-        child INT NOT NULL,
-        depth INT NOT NULL
+        parentID INT NOT NULL , 
+        childID INT NOT NULL,
+        depth INT NOT NULL,
+        FOREIGN KEY(parentID) REFERENCES TodoTask(rowid),
+        FOREIGN KEY(childID) REFERENCES TodoTask(rowid)
     );
     '''
 
