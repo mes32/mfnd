@@ -22,6 +22,8 @@ def printHelp():
     print("    help               Display this help screen")
     print("    pumpkin <####>     Configure hour-of-day for reset of to-do list")
     print("                       Requires 4 digits in 24-hour clock mode (default 0400)")
+    print("    //undo               Undo previous command")
+    print("    //redo               Redo previous undone command")
     print()
     print("    todo <description>   Add a new task with <description>")
     print("    //todosub <P> <description>  Add a sub-task under the task at position <P>")
@@ -169,6 +171,13 @@ class TodoShell(cmd.Cmd):
         Undo the last action
         """
         print("    # undo() - doing nothing")
+        self.__printDB()
+
+    def do_redo(self, arg):
+        """
+        Redo the last undone action
+        """
+        print("    # redo() - doing nothing")
         self.__printDB()
 
     def do_add(self, s):
