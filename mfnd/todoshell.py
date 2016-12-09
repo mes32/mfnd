@@ -5,9 +5,12 @@ Module defining a custom command shell
 
 """
 
-import cmd, datetime, sys
+import cmd
+import datetime
+import sys
 import sqlite3
 
+import cmdtoken
 from database import TodoDatabase
 from todotask import TodoTask
 
