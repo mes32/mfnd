@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 
-Module for commands typed by the user
+Module defining a custom command shell
 
 """
 
