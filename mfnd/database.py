@@ -88,6 +88,7 @@ class TodoDatabase:
 
         self.databasePath = databasePath
         conn = sqlite3.connect(databasePath)
+        conn.isolation_level = None
         c = conn.cursor()
 
         # Create table TodoTask
@@ -131,10 +132,10 @@ class TodoDatabase:
         # If a reset point 'pumpkin time' is more recent than the last database initialization, 
         # it's a new day therefore delete the entire TodoTask table
         if sincePumpkin < sinceInit:
-            sql = '''
-            DELETE FROM TodoTask;
-            '''
-            c.execute(sql)
+            c.execute("BEGIN")
+            c.execute("DELETE FROM TodoTask;")
+            c.execute("DELETE FROM ClosureTable;")
+            c.execute("END")
 
         # Update the time of last initialization to current time 
         sql = '''
