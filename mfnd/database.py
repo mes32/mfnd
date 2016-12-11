@@ -54,10 +54,32 @@ class TodoDatabase:
     -- Increment TodoTask.position before INSERT --
     CREATE TRIGGER IF NOT EXISTS TodoTask_insert AFTER INSERT ON TodoTask
     BEGIN
-        UPDATE TodoTask SET parentID = new.rowid WHERE parentID IS NULL AND rowid = new.rowid;
-        -- Insert into ClosureTable based on parentID
-        -- Update should actually only order within a level
-        UPDATE TodoTask SET position = position + 1 WHERE position >= new.position AND rowid != new.rowid;
+        UPDATE TodoTask
+            SET position = position + 1
+            WHERE position >= new.position AND parentID = new.parentID AND rowid != new.rowid;
+
+        INSERT INTO ClosureTable(
+            parentID,
+            childID,
+            depth
+        ) VALUES (
+            new.rowid,
+            new.rowid,
+            0
+        );
+
+        INSERT INTO ClosureTable(
+            parentID,
+            childID,
+            depth
+        ) SELECT
+            p.parentID,
+            c.childID,
+            p.depth + c.depth + 1
+        FROM
+            ClosureTable AS p,
+            ClosureTable AS c
+        WHERE p.childID = new.parentID AND c.parentID = new.rowid;
     END;
     '''
 
@@ -204,10 +226,12 @@ class TodoDatabase:
         if position == None:
             sql = '''
             INSERT INTO TodoTask (
+                parentID,
                 description,
                 position,
                 completionStatus
             ) VALUES (
+                0,
                 \'''' + strSQLite(task.description) + '''\',
                 (SELECT COALESCE(MAX(position), 0) FROM TodoTask) + 1,
                 \'''' + strSQLite(task.completionStatus) + '''\'
@@ -216,10 +240,12 @@ class TodoDatabase:
         else:
             sql = '''
             INSERT INTO TodoTask (
+                parentID,
                 description,
                 position,
                 completionStatus
             ) VALUES (
+                0,
                 \'''' + strSQLite(task.description) + '''\',
                 ''' + strSQLite(position) + ''',
                 \'''' + strSQLite(task.completionStatus) + '''\'
