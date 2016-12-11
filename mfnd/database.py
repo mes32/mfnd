@@ -200,20 +200,24 @@ class TodoDatabase:
             sql = '''
             INSERT INTO TodoTask (
                 description,
-                position
+                position,
+                completionStatus
             ) VALUES (
                 \'''' + strSQLite(task.description) + '''\',
-                (SELECT COALESCE(MAX(position), 0) FROM TodoTask) + 1
+                (SELECT COALESCE(MAX(position), 0) FROM TodoTask) + 1,
+                \'''' + strSQLite(task.completionStatus) + '''\'
             );
             '''
         else:
             sql = '''
             INSERT INTO TodoTask (
                 description,
-                position
+                position,
+                completionStatus
             ) VALUES (
                 \'''' + strSQLite(task.description) + '''\',
-                ''' + strSQLite(position) + '''
+                ''' + strSQLite(position) + ''',
+                \'''' + strSQLite(task.completionStatus) + '''\'
             );
             '''  
         c.execute(sql)
