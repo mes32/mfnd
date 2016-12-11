@@ -153,6 +153,10 @@ class TodoShell(cmd.Cmd):
         """
 
         tokens = arg.split()
+        if len(tokens) != 2:
+            self.default(self.lastcmd)
+            return
+
         num = int(tokens[0])
         direction = tokens[1]
 
@@ -165,7 +169,7 @@ class TodoShell(cmd.Cmd):
         elif direction == 'bottom':
             self.database.moveBottom(num)
         else:
-            self.default()
+            self.default(self.lastcmd)
             return
         self.__printDB()
 
