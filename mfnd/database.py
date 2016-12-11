@@ -27,6 +27,7 @@ class TodoDatabase:
     -- Tasks to do --
     CREATE TABLE IF NOT EXISTS TodoTask (
         rowid INTEGER PRIMARY KEY,
+        parentID INT DEFAULT NULL,
         description TEXT NOT NULL, 
         position INT NOT NULL,
         completionStatus TEXT NOT NULL DEFAULT 'todo', 
@@ -48,9 +49,12 @@ class TodoDatabase:
 
     CREATE_TRIGGER_TODOTASK_INSERT = '''
     -- Increment TodoTask.position before INSERT --
-    CREATE TRIGGER IF NOT EXISTS TodoTask_insert BEFORE INSERT ON TodoTask
+    CREATE TRIGGER IF NOT EXISTS TodoTask_insert AFTER INSERT ON TodoTask
     BEGIN
-        UPDATE TodoTask SET position = position + 1 WHERE position >= new.position;
+        UPDATE TodoTask SET parentID = new.rowid WHERE parentID IS NULL AND rowid = new.rowid;
+        -- Insert into ClosureTable based on parentID
+        -- Update should actually only order within a level
+        UPDATE TodoTask SET position = position + 1 WHERE position >= new.position AND rowid != new.rowid;
     END;
     '''
 
