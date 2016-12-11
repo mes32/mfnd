@@ -13,6 +13,7 @@ import sqlite3
 import cmdtoken
 from database import TodoDatabase
 from todotask import TodoTask
+from tasktree import TaskTree
 
 
 def printHelp():
@@ -256,9 +257,6 @@ class TodoShell(cmd.Cmd):
         print()
 
         tasks = self.database.getTasks()
-        num = len(tasks)
-        if num != 0:
-            for i in range(0, num):
-                print(tasks[i])
-            print()
+        print(tasks)
+
 

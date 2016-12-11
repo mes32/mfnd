@@ -9,6 +9,7 @@ import time
 import sqlite3
 
 from todotask import TodoTask
+from tasktree import TaskTree
 
 def strSQLite(string):
     """
@@ -206,14 +207,14 @@ class TodoDatabase:
             position ASC;
         '''
 
-        tasks = []
+        taskTree = TaskTree()
         for row in c.execute(sql):
             newTask = TodoTask(description = row[0], position = row[1], completionStatus = row[2])
-            tasks.append(newTask)
+            taskTree.insert(newTask)
         conn.commit()
         conn.close()
 
-        return tasks
+        return taskTree
 
     def insertTask(self, task, position = None):
         """
