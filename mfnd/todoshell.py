@@ -171,6 +171,13 @@ class TodoShell(cmd.Cmd):
         else:
             self.default(self.lastcmd)
             return
+
+        # except Exception:
+        #     # In this case Exception is non-specific
+        #     # The move could have failed due to other reasons
+        #     self.default(self.lastcmd)
+        #     return
+
         self.__printDB()
 
     def do_undo(self, arg):

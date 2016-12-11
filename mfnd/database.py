@@ -23,6 +23,9 @@ class TodoDatabase:
     Represents an SQLite database storing tasks in a to-do list
     """
 
+    class TaskIndexException(Exception):
+        pass
+
     CREATE_TABLE_TODOTASK = '''
     -- Tasks to do --
     CREATE TABLE IF NOT EXISTS TodoTask (
@@ -175,6 +178,8 @@ class TodoDatabase:
             completionStatus
         FROM
             TodoTask
+        WHERE
+            parentID IS NOT NULL
         ORDER BY
             position ASC;
         '''
@@ -289,6 +294,11 @@ class TodoDatabase:
         """
 
         task = self.getTask(currPosition)
+        # except sqlite3.Error:
+        #     # In this instance sqlite3.Error is actually non-specific
+        #     # getTask might fail for other reasons besides out of bounds error
+        #     raise self.TaskIndexException()
+
         self.deleteTask(currPosition)
         self.insertTask(task, newPosition)
 
