@@ -20,7 +20,7 @@ class TaskTree:
 
         self.tasks = []
 
-    def insert(self, task):
+    def insert(self, rowid, parentID, task, maxDepth):
         """
         Insert a new task into the tree
         """

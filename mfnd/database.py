@@ -195,22 +195,41 @@ class TodoDatabase:
         c = conn.cursor()
 
         sql = '''
-        SELECT
+        SELECT 
+            rowid,
+            parentID,
             description,
             position,
-            completionStatus
+            completionStatus,
+            maxDepth
         FROM
-            TodoTask
+            TodoTask AS t
+        LEFT JOIN (
+            SELECT
+                childID,
+                MAX(depth) AS maxDepth
+            FROM
+                ClosureTable
+            GROUP BY childID
+        )
+        ON
+            rowid = childID
         WHERE
             parentID IS NOT NULL
         ORDER BY
-            position ASC;
+            maxDepth ASC, position ASC;
+
+
+        --- SELECT t.rowid, t.parentID, t.description, MAX(c.depth) FROM TodoTask AS t LEFT JOIN ClosureTable AS c ON t.rowid = c.childID GROUP BY c.childID ORDER BY MAX(c.depth) ASC, t.position ASC;    
         '''
 
         taskTree = TaskTree()
         for row in c.execute(sql):
-            newTask = TodoTask(description = row[0], position = row[1], completionStatus = row[2])
-            taskTree.insert(newTask)
+            rowid = row[0]
+            parentID = row[1]
+            newTask = TodoTask(description = row[2], position = row[3], completionStatus = row[4])
+            maxDepth = row[5]
+            taskTree.insert(rowid, parentID, newTask, maxDepth)
         conn.commit()
         conn.close()
 
