@@ -31,10 +31,12 @@ class TaskTree:
         Return a human readable str representation of this tree
         """
 
+        outputStr = ""
         num = len(self.tasks)
-        if num != 0:
-           for i in range(0, num):
-               print(self.tasks[i])
-           print()
 
-        return "[TREE GOES HERE]"
+        if num != 0:
+            for i in range(0, num):
+                outputStr += str(self.tasks[i]) + "\n"
+            outputStr += "\n"
+
+        return outputStr
