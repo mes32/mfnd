@@ -68,8 +68,9 @@ class TodoShell(cmd.Cmd):
         try:
             self.__printDB()
             super().cmdloop()
-        except Exception:
-            self.default()
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            raise
 
     def emptyline(self):
         """

@@ -286,7 +286,7 @@ class TodoDatabase:
 
     def deleteTask(self, position):
         """
-        Update a task entry in the database
+        Delete a task entry from the database
         """
 
         conn = sqlite3.connect(self.databasePath)
