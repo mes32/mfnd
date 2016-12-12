@@ -276,13 +276,16 @@ class TodoDatabase:
         Update a task entry in the database
         """
 
+        tasks = self.getTasks()
+        rowid = tasks.getRowid(position)
+
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
 
         sql = '''
         UPDATE TodoTask
             SET completionStatus = 'done'
-            WHERE position == ''' + strSQLite(position) + ''' ;
+            WHERE rowid == ''' + strSQLite(rowid) + ''' ;
         '''
         c.execute(sql)
 
@@ -294,12 +297,15 @@ class TodoDatabase:
         Delete a task entry from the database
         """
 
+        tasks = self.getTasks()
+        rowid = tasks.getRowid(position)
+
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
 
         sql = '''
         DELETE FROM TodoTask
-            WHERE position == ''' + strSQLite(position) + ''' ;
+            WHERE rowid == ''' + strSQLite(rowid) + ''' ;
         '''
         c.execute(sql)
 
