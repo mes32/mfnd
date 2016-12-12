@@ -183,10 +183,15 @@ class TodoDatabase:
         self.insertTask(task)
         task = TodoTask("Put cover sheet on TPS report (C)")
         self.insertTask(task)
-        task = TodoTask("Sub-task (3.1)")
-        self.insertTask(task, None, 3)
         task = TodoTask("Put cover sheet on TPS report (D)")
         self.insertTask(task)
+
+        task = TodoTask("Sub-task (4.1)")
+        self.insertTask(task, None, 4)
+        task = TodoTask("Sub-task (3.1)")
+        self.insertTask(task, None, 3)
+        task = TodoTask("Sub-task (3.2)")
+        self.insertTask(task, None, 3)
 
     def getTasks(self):
         """

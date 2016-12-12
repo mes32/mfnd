@@ -79,7 +79,7 @@ class TreeNode:
         """
 
         outputStr = ""
-        outputStr += str(task) + "\n"
+        outputStr += str(self.task) + "\n"
         for node in self.children:
             outputStr += "   " + str(node)
 

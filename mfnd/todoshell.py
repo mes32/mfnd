@@ -68,6 +68,8 @@ class TodoShell(cmd.Cmd):
         try:
             self.__printDB()
             super().cmdloop()
+        except SystemExit:
+            return
         except:
             print("Unexpected error:", sys.exc_info()[0])
             raise
@@ -121,8 +123,12 @@ class TodoShell(cmd.Cmd):
         Add a new sub-task under another task
         """
 
-        #task = TodoTask(arg)
-        #self.database.insertSubtask(task)
+        tokens = arg.split()
+        parentPos = int(tokens[0])
+        description = str(" ".join(tokens[1:]))
+
+        task = TodoTask(description)
+        self.database.insertTask(task, None, parentPos)
         self.__printDB()   
 
     def do_done(self, arg):
