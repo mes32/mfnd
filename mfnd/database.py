@@ -183,6 +183,8 @@ class TodoDatabase:
         self.insertTask(task)
         task = TodoTask("Put cover sheet on TPS report (C)")
         self.insertTask(task)
+        task = TodoTask("Sub-task (3.1)")
+        self.insertTask(task, None, 3)
         task = TodoTask("Put cover sheet on TPS report (D)")
         self.insertTask(task)
 
@@ -218,9 +220,6 @@ class TodoDatabase:
             parentID IS NOT NULL
         ORDER BY
             maxDepth ASC, position ASC;
-
-
-        --- SELECT t.rowid, t.parentID, t.description, MAX(c.depth) FROM TodoTask AS t LEFT JOIN ClosureTable AS c ON t.rowid = c.childID GROUP BY c.childID ORDER BY MAX(c.depth) ASC, t.position ASC;    
         '''
 
         taskTree = TaskTree()
@@ -235,42 +234,33 @@ class TodoDatabase:
 
         return taskTree
 
-    def insertTask(self, task, position = None):
+    def insertTask(self, task, position = None, parentID = 0):
         """
         Insert a new task object into the database
         """
 
+        if position == None:
+            positionSQL = '(SELECT COALESCE(MAX(position), 0) FROM TodoTask WHERE parentID = ' + strSQLite(parentID) + ') + 1'
+        else:
+            positionSQL = strSQLite(position)
+
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
 
-        if position == None:
-            sql = '''
-            INSERT INTO TodoTask (
-                parentID,
-                description,
-                position,
-                completionStatus
-            ) VALUES (
-                0,
-                \'''' + strSQLite(task.description) + '''\',
-                (SELECT COALESCE(MAX(position), 0) FROM TodoTask) + 1,
-                \'''' + strSQLite(task.completionStatus) + '''\'
-            );
-            '''
-        else:
-            sql = '''
-            INSERT INTO TodoTask (
-                parentID,
-                description,
-                position,
-                completionStatus
-            ) VALUES (
-                0,
-                \'''' + strSQLite(task.description) + '''\',
-                ''' + strSQLite(position) + ''',
-                \'''' + strSQLite(task.completionStatus) + '''\'
-            );
-            '''  
+        sql = '''
+        INSERT INTO TodoTask (
+            parentID,
+            description,
+            position,
+            completionStatus
+        ) VALUES (
+            ''' + strSQLite(parentID) + ''',
+            \'''' + strSQLite(task.description) + '''\',
+            ''' + positionSQL + ''',
+            \'''' + strSQLite(task.completionStatus) + '''\'
+        );
+        '''
+
         c.execute(sql)
 
         conn.commit()

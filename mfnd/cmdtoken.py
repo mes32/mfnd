@@ -6,7 +6,7 @@ Module defining command tokens (Command Pattern) for use by the TodoShell CLI
 """
 
 
-class Cmdtoken():
+class Cmdtoken:
     """
     Abstract command class
     """
