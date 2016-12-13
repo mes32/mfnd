@@ -30,7 +30,7 @@ def printHelp():
     print("    //redo               Redo previous undone command")
     print()
     print("    todo <description>   Add a new task with <description>")
-    print("    //todosub <P> <description>  Add a sub-task under the task at position <P>")
+    print("    todosub <P> <description>  Add a sub-task under the task at position <P>")
     print("    done <P>           Mark the task at <P> as complete")
     print("    remove <P>         Delete the task at <P>")
     print()

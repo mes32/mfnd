@@ -88,7 +88,19 @@ class TodoDatabase:
     -- Decrement TodoTask.position after DELETE --
     CREATE TRIGGER IF NOT EXISTS TodoTask_delete AFTER DELETE ON TodoTask
     BEGIN
-        UPDATE TodoTask SET position = position - 1 WHERE position > old.position;
+        DELETE FROM ClosureTable
+        WHERE parentID IN (
+            SELECT c.parentID
+            FROM ClosureTable p, ClosureTable c
+            WHERE p.parentID = old.rowid AND c.childID = p.childID
+        );
+
+        DELETE FROM TodoTask 
+        WHERE parentID = old.rowid;
+
+        UPDATE TodoTask
+            SET position = position - 1
+            WHERE position > old.position AND parentID = old.parentID;
     END;
     '''
 
