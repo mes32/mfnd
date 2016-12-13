@@ -48,9 +48,9 @@ class TaskTree:
             return -1
 
         for i in self.taskDict:
-            if self.taskDict[i].depth == 0 and position == i:
+            if self.taskDict[i].depth == 2 and position == self.taskDict[i].task.position:
                 if suffix == "":
-                    return i
+                    return self.taskDict[i].rowid
                 else:
                     return self.taskDict[i].getRowid(suffix)
 
@@ -67,7 +67,7 @@ class TaskTree:
 
         if num != 0:
             for i in self.taskDict:
-                if self.taskDict[i].depth == 0:
+                if self.taskDict[i].depth == 2:
                     outputStr += str(self.taskDict[i])
 
         return outputStr

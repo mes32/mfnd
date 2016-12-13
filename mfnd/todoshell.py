@@ -124,11 +124,11 @@ class TodoShell(cmd.Cmd):
         """
 
         tokens = arg.split()
-        parentPos = int(tokens[0])
+        parentLabel = tokens[0]
         description = str(" ".join(tokens[1:]))
 
         task = TodoTask(description)
-        self.database.insertTask(task, None, parentPos)
+        self.database.insertTask(task, None, parentLabel)
         self.__printDB()   
 
     def do_done(self, arg):

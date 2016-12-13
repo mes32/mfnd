@@ -34,9 +34,7 @@ class TodoDatabase:
         parentID INT DEFAULT NULL,
         description TEXT NOT NULL, 
         position INT NOT NULL,
-        completionStatus TEXT NOT NULL DEFAULT 'todo', 
-        visible INT, 
-        mode_id INT
+        completionStatus TEXT NOT NULL DEFAULT 'todo'
     );
     '''
 
@@ -102,6 +100,34 @@ class TodoDatabase:
             SET position = position - 1
             WHERE position > old.position AND parentID = old.parentID;
     END;
+    '''
+
+    INSERT_TODO_ROOT = '''
+    INSERT INTO TodoTask (
+        parentID,
+        description, 
+        position,
+        completionStatus
+    ) VALUES (
+        NULL,
+        '[root]',
+        1,
+        'na'
+    );
+    '''
+
+    INSERT_TODO_DEFAULTMODE = '''
+    INSERT OR IGNORE INTO TodoTask (
+        parentID,
+        description,
+        position,
+        completionStatus
+    ) VALUES (
+        1,
+        '[default]',
+        1,
+        'na'
+    );
     '''
 
     CREATE_TABLE_CONFIGTIME = '''
@@ -179,6 +205,10 @@ class TodoDatabase:
             c.execute("DELETE FROM ClosureTable;")
             c.execute("END")
 
+            # Add initial entries into TodoTask
+            c.execute(self.INSERT_TODO_ROOT)
+            c.execute(self.INSERT_TODO_DEFAULTMODE)
+
         # Update the time of last initialization to current time 
         sql = '''
         UPDATE ConfigTime SET lastInitTime = \'''' + strSQLite(currentTime) + '''\' WHERE id = 1;
@@ -199,11 +229,11 @@ class TodoDatabase:
         self.insertTask(task)
 
         task = TodoTask("Sub-task (4.1)")
-        self.insertTask(task, None, 4)
-        task = TodoTask("Sub-task (3.1)")
-        self.insertTask(task, None, 3)
-        task = TodoTask("Sub-task (3.2)")
-        self.insertTask(task, None, 3)
+        self.insertTask(task, None, "4")
+        #task = TodoTask("Sub-task (3.1)")
+        #self.insertTask(task, None, 3)
+        #task = TodoTask("Sub-task (3.2)")
+        #self.insertTask(task, None, 3)
 
     def getTasks(self):
         """
@@ -234,7 +264,7 @@ class TodoDatabase:
         ON
             rowid = childID
         WHERE
-            parentID IS NOT NULL
+            parentID >= 2
         ORDER BY
             maxDepth ASC, position ASC;
         '''
@@ -251,10 +281,15 @@ class TodoDatabase:
 
         return taskTree
 
-    def insertTask(self, task, position = None, parentID = 0):
+    def insertTask(self, task, position = None, parentLabel = None):
         """
         Insert a new task object into the database
         """
+
+        if parentLabel == None:
+            parentID = 2
+        else:
+            parentID = self.getTasks().getRowid(parentLabel)
 
         if position == None:
             positionSQL = '(SELECT COALESCE(MAX(position), 0) FROM TodoTask WHERE parentID = ' + strSQLite(parentID) + ') + 1'
