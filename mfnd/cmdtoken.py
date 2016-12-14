@@ -14,25 +14,50 @@ class CommandStack:
     Stack of command tokens that can be navigated forward and backward
     """
 
-    def push(self, token):
+    stack = list()
+    stackIndex = 0
+    maxIndex = 0
+
+    @staticmethod
+    def push(token):
         """
         Add a new command token to the top of the stack
         """
+        CommandStack.stack.insert(CommandStack.stackIndex, token)
+        CommandStack.stackIndex += 1
+        CommandStack.maxIndex = CommandStack.stackIndex
 
-    def pop(self):
+    @staticmethod
+    def pop():
         """
         Remove a command token from the top of the stack and return
         """
+        token = CommandStack.stack.pop()
+        CommandStack.stackIndex -= 1
+        return token
 
-    def undo(self):
+    @staticmethod
+    def undo():
         """
         Roll back the previous command
         """
+        if CommandStack.stackIndex == 0:
+            return False
+        else:
+            CommandStack.pop().undo()
+            return True
 
-    def redo(self):
+    @staticmethod
+    def redo():
         """
         Go forward from a previously undone command if possible
         """
+        if CommandStack.stackIndex == CommandStack.maxIndex:
+            print("(doing nothing) In CommandStack.redo() index = " + str(CommandStack.stackIndex))
+            return False
+        else:
+            print("(doing nothing) In CommandStack.redo() index = " + str(CommandStack.stackIndex))
+            return True
 
 class TodoCommand:
     """
@@ -50,11 +75,12 @@ class TodoCommand:
         """
 
         self.rowid = self.database.insertTask(self.task)
-
+        CommandStack.push(self)
 
     def undo(self):
         """
         Undo this command
         """
 
+        print("In TodoCommand undo(). Delete rowid = " + str(self.rowid))
         self.database.deleteTask(None, self.rowid)

@@ -48,8 +48,6 @@ class TodoShell(cmd.Cmd):
     prompt = '> '
     file = None
 
-    commandStack = cmdtoken.CommandStack()
-
     def __init__(self, database):
         """
         Initialize a shell for todo-list commands
@@ -195,15 +193,16 @@ class TodoShell(cmd.Cmd):
         """
         Undo the last action
         """
-        print("    # undo() - doing nothing")
-        self.__printDB()
+
+        if cmdtoken.CommandStack.undo():
+            self.__printDB()
 
     def do_redo(self, arg):
         """
         Redo the last undone action
         """
-        print("    # redo() - doing nothing")
-        self.__printDB()
+        if cmdtoken.CommandStack.redo():
+            self.__printDB()
 
     def do_add(self, s):
         pass

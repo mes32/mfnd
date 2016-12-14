@@ -315,12 +315,7 @@ class TodoDatabase:
         c.execute(sql)
 
         sql = '''
-        SELECT DISTINCT
-            rowid
-        FROM
-            TodoTask
-        WHERE
-            parentID = ''' + strSQLite(parentID) + ''' AND position = ''' + strSQLite(positionSQL) + ''';
+        SELECT last_insert_rowid() FROM TodoTask;
         '''
         rowid = 0
         for row in c.execute(sql):
