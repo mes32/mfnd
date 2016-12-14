@@ -87,8 +87,8 @@ class TodoDatabase:
     CREATE TRIGGER IF NOT EXISTS TodoTask_delete AFTER DELETE ON TodoTask
     BEGIN
         DELETE FROM ClosureTable
-        WHERE parentID IN (
-            SELECT c.parentID
+        WHERE childID IN (
+            SELECT DISTINCT p.childID
             FROM ClosureTable p, ClosureTable c
             WHERE p.parentID = old.rowid AND c.childID = p.childID
         );
@@ -230,10 +230,10 @@ class TodoDatabase:
 
         task = TodoTask("Sub-task (4.1)")
         self.insertTask(task, None, "4")
-        #task = TodoTask("Sub-task (3.1)")
-        #self.insertTask(task, None, 3)
-        #task = TodoTask("Sub-task (3.2)")
-        #self.insertTask(task, None, 3)
+        task = TodoTask("Sub-task (3.1)")
+        self.insertTask(task, None, "3")
+        task = TodoTask("Sub-task (3.2)")
+        self.insertTask(task, None, "3")
 
     def getTasks(self):
         """
