@@ -110,7 +110,11 @@ class TreeNode:
             return self.rowid
 
         positionList = treeLabel.split(".")
-        position = int(positionList[0])
+        if self.depth == 2:
+            # TODO: Should reverse multi-letter indexes
+            position = ord(positionList[0]) - 96
+        else:
+            position = int(positionList[0])
         suffix = ".".join(positionList[1:])
 
         return self.children[position - 1].getRowid(suffix)
@@ -120,9 +124,14 @@ class TreeNode:
         Return a human readable str representation of this node
         """
 
-        label = "   " + parentLabel + str(count) + "."
+        if self.depth == 3:
+            # TODO: Should wrap to more than one digit for 'count' > 122
+            label = "   " + parentLabel + chr(count + 96) + "."
+        else:
+            label = "   " + parentLabel + str(count) + "."
+
         if self.task.completionStatus == 'done':
-            labelRegex = re.compile(r'[0-9\.]|[ ](?=[0-9])')
+            labelRegex = re.compile(r'[0-9\.a-z]|[ ](?=[0-9])')
             newLabel = re.sub(labelRegex, '-', label)
             outputStr = newLabel + " " + str(self.task) + " ---\n"
         else:
