@@ -308,15 +308,29 @@ class TodoDatabase:
         ) VALUES (
             ''' + strSQLite(parentID) + ''',
             \'''' + strSQLite(task.description) + '''\',
-            ''' + positionSQL + ''',
+            ''' + strSQLite(positionSQL) + ''',
             \'''' + strSQLite(task.completionStatus) + '''\'
         );
         '''
-
         c.execute(sql)
+
+        sql = '''
+        SELECT DISTINCT
+            rowid
+        FROM
+            TodoTask
+        WHERE
+            parentID = ''' + strSQLite(parentID) + ''' AND position = ''' + strSQLite(positionSQL) + ''';
+        '''
+        rowid = 0
+        for row in c.execute(sql):
+            rowid = row[0]
+            break
 
         conn.commit()
         conn.close()
+
+        return rowid
 
     def doneTask(self, position):
         """
@@ -339,13 +353,14 @@ class TodoDatabase:
         conn.commit()
         conn.close()
 
-    def deleteTask(self, position):
+    def deleteTask(self, position, rowid = None):
         """
         Delete a task entry from the database
         """
 
         tasks = self.getTasks()
-        rowid = tasks.getRowid(position)
+        if rowid == None:
+            rowid = tasks.getRowid(position)
 
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()

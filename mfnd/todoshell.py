@@ -26,8 +26,8 @@ def printHelp():
     print("    help               Display this help screen")
     print("    pumpkin <####>     Configure hour-of-day for reset of to-do list")
     print("                       Requires 4 digits in 24-hour clock mode (default 0400)")
-    print("    //undo               Undo previous command")
-    print("    //redo               Redo previous undone command")
+    print("    undo               Undo previous command")
+    print("    redo               Redo previous undone command")
     print()
     print("    todo <description>   Add a new task with <description>")
     print("    todosub <P> <description>  Add a sub-task under the task at position <P>")
@@ -48,6 +48,7 @@ class TodoShell(cmd.Cmd):
     prompt = '> '
     file = None
 
+    commandStack = cmdtoken.CommandStack()
 
     def __init__(self, database):
         """
@@ -115,7 +116,9 @@ class TodoShell(cmd.Cmd):
         """
 
         task = TodoTask(arg)
-        self.database.insertTask(task)
+        command = cmdtoken.TodoCommand(self.database, task)
+        command.execute()
+
         self.__printDB()
 
     def do_todosub(self, arg):
