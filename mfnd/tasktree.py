@@ -5,6 +5,8 @@ Module for the to-do list tree
 
 """
 
+import re
+
 from todotask import TodoTask 
 
 
@@ -65,10 +67,13 @@ class TaskTree:
         outputStr = ""
         num = len(self.taskDict)
 
+        count = 1
+
         if num != 0:
             for i in self.taskDict:
                 if self.taskDict[i].depth == 2:
-                    outputStr += str(self.taskDict[i])
+                    outputStr += self.taskDict[i].formatStr(count)
+                    count += 1
 
         return outputStr
 
@@ -110,14 +115,22 @@ class TreeNode:
 
         return self.children[position - 1].getRowid(suffix)
 
-    def __str__(self):
+    def formatStr(self, count = 1, parentLabel = ""):
         """
         Return a human readable str representation of this node
         """
 
-        outputStr = ""
-        outputStr += str(self.task) + "\n"
+        label = "   " + parentLabel + str(count) + "."
+        if self.task.completionStatus == 'done':
+            labelRegex = re.compile(r'[0-9\.]|[ ](?=[0-9])')
+            newLabel = re.sub(labelRegex, '-', label)
+            outputStr = newLabel + " " + str(self.task) + " ---\n"
+        else:
+            outputStr = label + " " + str(self.task) + "\n"
+
+        count = 1
         for node in self.children:
-            outputStr += "   " + str(node)
+            outputStr += node.formatStr(count, label)
+            count += 1
 
         return outputStr

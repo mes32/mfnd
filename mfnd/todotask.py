@@ -27,7 +27,4 @@ class TodoTask:
         Return a human readable str representation of this task
         """
 
-        if self.completionStatus == 'todo':
-            return "  " + str(self.position) + ". " + self.description
-        elif self.completionStatus == 'done':
-            return " --- " + self.description + " ---"
+        return self.description
