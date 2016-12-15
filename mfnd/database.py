@@ -327,13 +327,13 @@ class TodoDatabase:
 
         return rowid
 
-    def doneTask(self, position):
+    def doneTask(self, label):
         """
-        Update a task entry in the database
+        Update a task entry in the database so completionStatus = 'done'
         """
 
         tasks = self.getTasks()
-        rowid = tasks.getRowid(position)
+        rowid = tasks.getRowid(label)
 
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
@@ -347,6 +347,28 @@ class TodoDatabase:
 
         conn.commit()
         conn.close()
+
+        return rowid
+
+    def todoTask(self, rowid):
+        """
+        Update a task entry in the database so completionStatus = 'todo'
+        """
+
+        conn = sqlite3.connect(self.databasePath)
+        c = conn.cursor()
+
+        sql = '''
+        UPDATE TodoTask
+            SET completionStatus = 'todo'
+            WHERE rowid == ''' + strSQLite(rowid) + ''' ;
+        '''
+        c.execute(sql)
+
+        conn.commit()
+        conn.close()
+
+        return rowid
 
     def deleteTask(self, position, rowid = None):
         """

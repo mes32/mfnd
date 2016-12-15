@@ -19,6 +19,14 @@ class CommandStack:
     maxIndex = 0
 
     @staticmethod
+    def setDatabase(database):
+        """
+        Set the database on which commands will act
+        """
+
+        CommandStack.database = database
+
+    @staticmethod
     def push(token, inredo):
         """
         Add a new command token to the top of the stack
@@ -70,9 +78,8 @@ class TodoCommand:
     Class for command 'todo'
     """
 
-    def __init__(self, database, task):
+    def __init__(self, task):
 
-        self.database = database
         self.task = task
 
     def execute(self, inredo=False):
@@ -80,7 +87,7 @@ class TodoCommand:
         Execute this command
         """
 
-        self.rowid = self.database.insertTask(self.task)
+        self.rowid = CommandStack.database.insertTask(self.task)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -88,4 +95,28 @@ class TodoCommand:
         Undo this command
         """
 
-        self.database.deleteTask(None, self.rowid)
+        CommandStack.database.deleteTask(None, self.rowid)
+
+class DoneCommand:
+    """
+    Class for command 'done'
+    """
+
+    def __init__(self, label):
+
+        self.label = label
+
+    def execute(self, inredo=False):
+        """
+        Execute this command
+        """
+
+        self.rowid = CommandStack.database.doneTask(self.label)
+        CommandStack.push(self, inredo)
+
+    def undo(self):
+        """
+        Undo this command
+        """
+
+        CommandStack.database.todoTask(self.rowid)

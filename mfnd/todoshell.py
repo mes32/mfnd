@@ -58,8 +58,8 @@ class TodoShell(cmd.Cmd):
         stdout = None
 
         super().__init__(completekey, stdin, stdout)
-        #super().__init__()
         self.database = database
+        cmdtoken.CommandStack.setDatabase(database)
 
 
     # ----- basic TodoShell commands -----
@@ -116,7 +116,7 @@ class TodoShell(cmd.Cmd):
 
         description = arg
         task = TodoTask(description)
-        command = cmdtoken.TodoCommand(self.database, task)
+        command = cmdtoken.TodoCommand(task)
         command.execute()
 
         self.__printDB()
@@ -139,7 +139,10 @@ class TodoShell(cmd.Cmd):
         Mark a task on the to-do list as done
         """
 
-        self.database.doneTask(arg)
+        label = arg
+        command = cmdtoken.DoneCommand(label)
+        command.execute()   
+
         self.__printDB()
 
     def do_remove(self, arg):
