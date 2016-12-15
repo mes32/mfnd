@@ -19,21 +19,26 @@ class CommandStack:
     maxIndex = 0
 
     @staticmethod
-    def push(token):
+    def push(token, inredo):
         """
         Add a new command token to the top of the stack
         """
-        CommandStack.stack.insert(CommandStack.stackIndex, token)
+
         CommandStack.stackIndex += 1
-        CommandStack.maxIndex = CommandStack.stackIndex
+
+        if inredo == False:
+            CommandStack.stack.insert(CommandStack.stackIndex - 1, token)
+            CommandStack.maxIndex = CommandStack.stackIndex
 
     @staticmethod
     def pop():
         """
         Remove a command token from the top of the stack and return
         """
-        token = CommandStack.stack.pop()
+
+        token = CommandStack.stack[CommandStack.stackIndex - 1]
         CommandStack.stackIndex -= 1
+
         return token
 
     @staticmethod
@@ -41,10 +46,11 @@ class CommandStack:
         """
         Roll back the previous command
         """
+
         if CommandStack.stackIndex == 0:
             return False
         else:
-            CommandStack.pop().undo()
+            CommandStack.pop().undo()            
             return True
 
     @staticmethod
@@ -52,11 +58,11 @@ class CommandStack:
         """
         Go forward from a previously undone command if possible
         """
+
         if CommandStack.stackIndex == CommandStack.maxIndex:
-            print("(doing nothing) In CommandStack.redo() index = " + str(CommandStack.stackIndex))
             return False
         else:
-            print("(doing nothing) In CommandStack.redo() index = " + str(CommandStack.stackIndex))
+            CommandStack.stack[CommandStack.stackIndex].execute(True)
             return True
 
 class TodoCommand:
@@ -69,18 +75,17 @@ class TodoCommand:
         self.database = database
         self.task = task
 
-    def execute(self):
+    def execute(self, inredo=False):
         """
         Execute this command
         """
 
         self.rowid = self.database.insertTask(self.task)
-        CommandStack.push(self)
+        CommandStack.push(self, inredo)
 
     def undo(self):
         """
         Undo this command
         """
 
-        print("In TodoCommand undo(). Delete rowid = " + str(self.rowid))
         self.database.deleteTask(None, self.rowid)

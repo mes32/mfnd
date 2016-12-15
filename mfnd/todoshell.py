@@ -53,11 +53,12 @@ class TodoShell(cmd.Cmd):
         Initialize a shell for todo-list commands
         """
 
-        completekey = 'tab'
-        stdin = None
-        stdout = None
+        #completekey = 'tab'
+        #stdin = None
+        #stdout = None
 
-        super().__init__(completekey, stdin, stdout)
+        #super().__init__(completekey, stdin, stdout)
+        super().__init__()
         self.database = database
 
 
@@ -113,7 +114,10 @@ class TodoShell(cmd.Cmd):
         Add a new task to the to-do list
         """
 
-        task = TodoTask(arg)
+        description = arg
+        print("In do_todo description = " + description)
+
+        task = TodoTask(description)
         command = cmdtoken.TodoCommand(self.database, task)
         command.execute()
 
@@ -201,6 +205,7 @@ class TodoShell(cmd.Cmd):
         """
         Redo the last undone action
         """
+        
         if cmdtoken.CommandStack.redo():
             self.__printDB()
 
