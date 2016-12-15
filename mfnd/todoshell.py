@@ -53,12 +53,12 @@ class TodoShell(cmd.Cmd):
         Initialize a shell for todo-list commands
         """
 
-        #completekey = 'tab'
-        #stdin = None
-        #stdout = None
+        completekey = 'tab'
+        stdin = None
+        stdout = None
 
-        #super().__init__(completekey, stdin, stdout)
-        super().__init__()
+        super().__init__(completekey, stdin, stdout)
+        #super().__init__()
         self.database = database
 
 
@@ -115,8 +115,6 @@ class TodoShell(cmd.Cmd):
         """
 
         description = arg
-        print("In do_todo description = " + description)
-
         task = TodoTask(description)
         command = cmdtoken.TodoCommand(self.database, task)
         command.execute()
@@ -205,7 +203,7 @@ class TodoShell(cmd.Cmd):
         """
         Redo the last undone action
         """
-        
+
         if cmdtoken.CommandStack.redo():
             self.__printDB()
 
@@ -230,7 +228,7 @@ class TodoShell(cmd.Cmd):
             self.cmdqueue.extend(f.read().splitlines())
 
     def precmd(self, line):
-        line = line.lower()
+        #line = line.lower()
         if self.file and 'playback' not in line:
             print(line, file=self.file)
         return line
