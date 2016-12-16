@@ -97,6 +97,32 @@ class TodoCommand:
 
         CommandStack.database.deleteTask(None, self.rowid)
 
+class TodosubCommand:
+    """
+    Class for command 'todosub'
+    """
+
+    def __init__(self, task, parentLabel):
+
+        self.task = task
+        self.parentLabel = parentLabel
+
+    def execute(self, inredo=False):
+        """
+        Execute this command
+        """
+
+        self.rowid = CommandStack.database.insertTask(self.task, None, self.parentLabel)
+
+        CommandStack.push(self, inredo)
+
+    def undo(self):
+        """
+        Undo this command
+        """
+
+        CommandStack.database.deleteTask(None, self.rowid)
+
 class DoneCommand:
     """
     Class for command 'done'

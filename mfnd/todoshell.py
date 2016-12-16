@@ -131,7 +131,9 @@ class TodoShell(cmd.Cmd):
         description = str(" ".join(tokens[1:]))
 
         task = TodoTask(description)
-        self.database.insertTask(task, None, parentLabel)
+        command = cmdtoken.TodosubCommand(task, parentLabel)
+        command.execute()
+
         self.__printDB()   
 
     def do_done(self, arg):
