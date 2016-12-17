@@ -21,7 +21,6 @@ class TaskTree:
         """
 
         self.taskDict = dict()
-        self.taskList = []
 
     def insert(self, rowid, parentID, task, maxDepth):
         """
@@ -30,10 +29,9 @@ class TaskTree:
 
         node = TreeNode(rowid, parentID, task, maxDepth)
         self.taskDict[rowid] = node
+        
         if parentID in self.taskDict:
             self.taskDict[parentID].addChild(node)
-
-        self.taskList.append(task)
 
     def getRowid(self, treeLabel):
         """
@@ -58,6 +56,18 @@ class TaskTree:
 
         return -1
 
+    def getSubtree(self, rootID):
+        """
+        Return a sub-tree of this tree based on the root node's rowid
+        """
+
+        output = TaskTree()
+        output.root = self.taskDict[rootID]
+        output.taskDict[rootID] = output.root
+        output.position = 1
+        output.parentID = output.root.parentID
+
+        return output
 
     def __str__(self):
         """

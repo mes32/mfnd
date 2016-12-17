@@ -10,6 +10,7 @@ import sqlite3
 
 from todotask import TodoTask
 from tasktree import TaskTree
+from tasktree import TreeNode
 
 def strSQLite(string):
     """
@@ -276,20 +277,22 @@ class TodoDatabase:
             newTask = TodoTask(description = row[2], position = row[3], completionStatus = row[4])
             maxDepth = row[5]
             taskTree.insert(rowid, parentID, newTask, maxDepth)
+
         conn.commit()
         conn.close()
 
         return taskTree
 
-    def insertTask(self, task, position = None, parentLabel = None):
+    def insertTask(self, task, position=None, parentLabel=None, parentID=None):
         """
         Insert a new task object into the database
         """
 
-        if parentLabel == None:
-            parentID = 2
-        else:
-            parentID = self.getTasks().getRowid(parentLabel)
+        if parentID == None:
+            if parentLabel == None:
+                parentID = 2
+            else:
+                parentID = self.getTasks().getRowid(parentLabel)
 
         if position == None:
             positionSQL = '(SELECT COALESCE(MAX(position), 0) FROM TodoTask WHERE parentID = ' + strSQLite(parentID) + ') + 1'
@@ -326,6 +329,26 @@ class TodoDatabase:
         conn.close()
 
         return rowid
+
+    def insertTree(self, tree):
+        """
+        Insert a tree of task objects into the database
+        """
+
+        self.insertTreeNode(tree.root, tree.position, tree.parentID)
+
+    def insertTreeNode(self, node, position, parentID):
+        """
+        Insert a tree node into the database
+        """
+
+        rowid = self.insertTask(node.task, position, None, parentID)
+        childNodes = node.children
+
+        index = 1
+        for child in childNodes:
+            self.insertTreeNode(child, index, rowid)
+            index += 1
 
     def doneTask(self, label):
         """
@@ -370,7 +393,7 @@ class TodoDatabase:
 
         return rowid
 
-    def deleteTask(self, position, rowid = None):
+    def deleteTask(self, position, rowid=None):
         """
         Delete a task entry from the database
         """
@@ -390,6 +413,8 @@ class TodoDatabase:
 
         conn.commit()
         conn.close()
+
+        return tasks.getSubtree(rowid)
 
     def configurePumpkinTime(self, timeInHours):
         """

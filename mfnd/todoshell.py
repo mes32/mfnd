@@ -152,7 +152,10 @@ class TodoShell(cmd.Cmd):
         Delete a task from the to-do list
         """
 
-        self.database.deleteTask(arg)
+        label = arg
+        command = cmdtoken.RemoveCommand(label)
+        command.execute()
+
         self.__printDB()
 
     def do_pumpkin(self, arg):

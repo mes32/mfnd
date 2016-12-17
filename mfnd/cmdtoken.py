@@ -146,3 +146,27 @@ class DoneCommand:
         """
 
         CommandStack.database.todoTask(self.rowid)
+
+class RemoveCommand:
+    """
+    Class for 'remove' command in todoshell
+    """
+
+    def __init__(self, label):
+
+        self.label = label
+
+    def execute(self, inredo=False):
+        """
+        Execute this command
+        """
+
+        self.tree = CommandStack.database.deleteTask(self.label)
+        CommandStack.push(self, inredo)
+
+    def undo(self):
+        """
+        Undo this command
+        """
+
+        CommandStack.database.insertTree(self.tree)
