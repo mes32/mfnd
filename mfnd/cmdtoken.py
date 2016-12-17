@@ -44,7 +44,7 @@ class CommandStack:
         Remove a command token from the top of the stack and return it
         """
 
-        token = CommandStack.stack[CommandStack.nextIndex - 1]ne
+        token = CommandStack.stack[CommandStack.nextIndex - 1]
         CommandStack.nextIndex -= 1
 
         return token
