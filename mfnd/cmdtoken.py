@@ -11,11 +11,11 @@ from todotask import TodoTask
 
 class CommandStack:
     """
-    Stack of command tokens that can be navigated forward and backward
+    Stack of command tokens that can be navigated forward and backward with undo/redo
     """
 
     stack = list()
-    stackIndex = 0
+    nextIndex = 0
     maxIndex = 0
 
     @staticmethod
@@ -32,30 +32,30 @@ class CommandStack:
         Add a new command token to the top of the stack
         """
 
-        CommandStack.stackIndex += 1
+        CommandStack.nextIndex += 1
 
         if inredo == False:
-            CommandStack.stack.insert(CommandStack.stackIndex - 1, token)
-            CommandStack.maxIndex = CommandStack.stackIndex
+            CommandStack.stack.insert(CommandStack.nextIndex - 1, token)
+            CommandStack.maxIndex = CommandStack.nextIndex
 
     @staticmethod
     def pop():
         """
-        Remove a command token from the top of the stack and return
+        Remove a command token from the top of the stack and return it
         """
 
-        token = CommandStack.stack[CommandStack.stackIndex - 1]
-        CommandStack.stackIndex -= 1
+        token = CommandStack.stack[CommandStack.nextIndex - 1]ne
+        CommandStack.nextIndex -= 1
 
         return token
 
     @staticmethod
     def undo():
         """
-        Roll back the previous command
+        Roll back the previous command if possible. Return 'True' if possible.
         """
 
-        if CommandStack.stackIndex == 0:
+        if CommandStack.nextIndex == 0:
             return False
         else:
             CommandStack.pop().undo()            
@@ -64,18 +64,18 @@ class CommandStack:
     @staticmethod
     def redo():
         """
-        Go forward from a previously undone command if possible
+        Go forward from a previously undone command if possible. Return 'True' if possible.
         """
 
-        if CommandStack.stackIndex == CommandStack.maxIndex:
+        if CommandStack.nextIndex == CommandStack.maxIndex:
             return False
         else:
-            CommandStack.stack[CommandStack.stackIndex].execute(True)
+            CommandStack.stack[CommandStack.nextIndex].execute(True)
             return True
 
 class TodoCommand:
     """
-    Class for command 'todo'
+    Class for 'todo' commands in todoshell
     """
 
     def __init__(self, task):
@@ -99,7 +99,7 @@ class TodoCommand:
 
 class TodosubCommand:
     """
-    Class for command 'todosub'
+    Class for 'todosub' commands in todoshell
     """
 
     def __init__(self, task, parentLabel):
@@ -125,7 +125,7 @@ class TodosubCommand:
 
 class DoneCommand:
     """
-    Class for command 'done'
+    Class for 'done' commands in todoshell
     """
 
     def __init__(self, label):
@@ -149,7 +149,7 @@ class DoneCommand:
 
 class RemoveCommand:
     """
-    Class for 'remove' command in todoshell
+    Class for 'remove' commands in todoshell
     """
 
     def __init__(self, label):
