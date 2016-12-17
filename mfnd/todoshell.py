@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 
-Module defining a custom command shell
+Module defining a custom command shell for mfnd
 
 """
 
@@ -58,12 +58,14 @@ class TodoShell(cmd.Cmd):
         stdout = None
 
         super().__init__(completekey, stdin, stdout)
+
         self.database = database
         cmdtoken.CommandStack.setDatabase(database)
 
-
-    # ----- basic TodoShell commands -----
     def cmdloop(self):
+        """
+        Run command loop REPL until the user exits
+        """
 
         try:
             self.__printDB()
@@ -76,16 +78,17 @@ class TodoShell(cmd.Cmd):
 
     def emptyline(self):
         """
-        Entering an empty command just provides a fresh prompt
+        Entering an empty command just provides a blank prompt
         """
 
-    def default(self, line = None):
+    def default(self, line=None):
         """
-        Display a warning about unusable command
+        Print help screen and display a warning about the unusable command
         """
 
         printHelp()
         print()
+
         if line != None:
             print("!!! Warning unusable input: '" + line + "'")
         else:
@@ -93,7 +96,7 @@ class TodoShell(cmd.Cmd):
 
     def do_exit(self, arg):
         """
-        Exit from the application
+        Exit from the command shell and the program
         """
 
         print("MFND exiting ...")
@@ -104,7 +107,7 @@ class TodoShell(cmd.Cmd):
 
     def do_help(self, arg):
         """
-        Display program usage
+        Display program usage help screen
         """
 
         printHelp()
@@ -123,7 +126,7 @@ class TodoShell(cmd.Cmd):
 
     def do_todosub(self, arg):
         """
-        Add a new sub-task under another task
+        Add a new sub-task to the to-do list under another task
         """
 
         tokens = arg.split()
@@ -138,7 +141,7 @@ class TodoShell(cmd.Cmd):
 
     def do_done(self, arg):
         """
-        Mark a task on the to-do list as done
+        Mark a task in the to-do list as done
         """
 
         label = arg
@@ -164,6 +167,7 @@ class TodoShell(cmd.Cmd):
         """
 
         self.database.configurePumpkinTime(arg)
+
         self.__printDB()
 
     def do_move(self, arg):
@@ -176,17 +180,17 @@ class TodoShell(cmd.Cmd):
             self.default(self.lastcmd)
             return
 
-        num = int(tokens[0])
+        label = int(tokens[0])
         direction = tokens[1]
 
         if direction == 'up':
-            self.database.moveUp(num)
+            self.database.moveUp(label)
         elif direction == 'down':
-            self.database.moveDown(num)
+            self.database.moveDown(label)
         elif direction == 'top':
-            self.database.moveTop(num)
+            self.database.moveTop(label)
         elif direction == 'bottom':
-            self.database.moveBottom(num)
+            self.database.moveBottom(label)
         else:
             self.default(self.lastcmd)
             return
@@ -201,7 +205,7 @@ class TodoShell(cmd.Cmd):
 
     def do_undo(self, arg):
         """
-        Undo the last action
+        Undo the last successful command if possible
         """
 
         if cmdtoken.CommandStack.undo():
@@ -209,7 +213,7 @@ class TodoShell(cmd.Cmd):
 
     def do_redo(self, arg):
         """
-        Redo the last undone action
+        Redo the last undone command if possible
         """
 
         if cmdtoken.CommandStack.redo():
@@ -223,31 +227,39 @@ class TodoShell(cmd.Cmd):
         offs = len(mline) - len(text)
         return [s[offs:] for s in completions if s.startswith(mline)]
 
-
-    # ----- record and playback -----
     def do_record(self, arg):
-        'Save future commands to filename:  RECORD rose.cmd'
+        """
+        Save future commands to filename:  RECORD rose.cmd
+        """
+
         self.file = open(arg, 'w')
 
     def do_playback(self, arg):
-        'Playback commands from a file:  PLAYBACK rose.cmd'
+        """
+        Playback commands from a file:  PLAYBACK rose.cmd
+        """
+
         self.close()
         with open(arg) as f:
             self.cmdqueue.extend(f.read().splitlines())
 
     def precmd(self, line):
-        #line = line.lower()
+
         if self.file and 'playback' not in line:
             print(line, file=self.file)
         return line
 
     def close(self):
+
         if self.file:
             self.file.close()
             self.file = None
 
-    # ----- helper functions -----
     def execute(self):
+        """
+        Execute the current command if possible
+        """
+
         try:
             self.executeFunc()
         except SystemExit:
@@ -258,13 +270,19 @@ class TodoShell(cmd.Cmd):
         except:
             self.default()
 
+    def __saveHistory(self):
+        """
+        Save command history to the database so it can be loaded for later sessions
+        """
 
+        print("    # In TodoShell __saveHistory() - doing nothing")
 
-    def __saveToDatabase(self):
-        print("    # saveToDatabase() - doing nothing")
+    def __loadHistory(self):
+        """
+        Load command history from the database saved during previous sessions
+        """
 
-    def __loadFromDatabase(self):
-        print("    # loadFromDatabase() - doing nothing")
+        print("    # In TodoShell __loadHistory() - doing nothing")
 
     def __printDB(self):
         """
