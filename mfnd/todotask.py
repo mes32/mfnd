@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 
-Module for tasks in the to-do list
+Module handles tasks in the to-do list
 
 """
 
 
 class TodoTask:
     """
-    Represents a task in the to-do list
+    Class represents a task in the to-do list
     """
 
     def __init__(self, description, position = None, completionStatus = 'todo'):
@@ -19,8 +19,6 @@ class TodoTask:
         self.description = description
         self.position = position
         self.completionStatus = completionStatus
-        self.visible = True
-        self.mode = 0
 
     def __str__(self):
         """
