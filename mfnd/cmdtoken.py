@@ -5,7 +5,6 @@ Module defining command tokens (Command Pattern) for use by the TodoShell CLI
 
 """
 
-from database import TodoDatabase
 from todotask import TodoTask
 
 
@@ -19,12 +18,12 @@ class CommandStack:
     maxIndex = 0
 
     @staticmethod
-    def setDatabase(database):
+    def setTaskTree(taskTree):
         """
         Set the database on which commands will act
         """
 
-        CommandStack.database = database
+        CommandStack.taskTree = taskTree
 
     @staticmethod
     def push(token, inredo):
@@ -87,7 +86,7 @@ class TodoCommand:
         Execute this command
         """
 
-        self.rowid = CommandStack.database.insertTask(self.task)
+        self.rowid = CommandStack.taskTree.insertTask(self.task)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -95,7 +94,7 @@ class TodoCommand:
         Undo this command
         """
 
-        CommandStack.database.deleteTask(None, self.rowid)
+        CommandStack.taskTree.deleteNode(self.rowid)
 
 class TodosubCommand:
     """
@@ -112,8 +111,7 @@ class TodosubCommand:
         Execute this command
         """
 
-        self.rowid = CommandStack.database.insertTask(self.task, None, self.parentLabel)
-
+        self.rowid = CommandStack.taskTree.insertTask(self.task, self.parentLabel)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -121,7 +119,7 @@ class TodosubCommand:
         Undo this command
         """
 
-        CommandStack.database.deleteTask(None, self.rowid)
+        CommandStack.taskTree.deleteTask(self.rowid)
 
 class DoneCommand:
     """
@@ -137,7 +135,8 @@ class DoneCommand:
         Execute this command
         """
 
-        self.rowid = CommandStack.database.doneTask(self.label)
+        self.rowid = CommandStack.taskTree.lookupRowid(self.label)
+        CommandStack.taskTree.setDone(self.rowid)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -145,7 +144,7 @@ class DoneCommand:
         Undo this command
         """
 
-        CommandStack.database.todoTask(self.rowid)
+        CommandStack.taskTree.setUndone(self.rowid)
 
 class RemoveCommand:
     """
@@ -161,7 +160,8 @@ class RemoveCommand:
         Execute this command
         """
 
-        self.tree = CommandStack.database.deleteTask(self.label)
+        self.rowid = CommandStack.taskTree.lookupRowid(self.label)
+        self.subtree = CommandStack.taskTree.deleteNode(self.rowid)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -169,4 +169,4 @@ class RemoveCommand:
         Undo this command
         """
 
-        CommandStack.database.insertTree(self.tree)
+        CommandStack.taskTree.insertSubtree(self.subtree)

@@ -9,19 +9,21 @@ import os
 
 from todoshell import TodoShell
 from database import TodoDatabase
+from tasktree import TaskTree
 
 
 def main():
 
     # Initialize the database
     database = initDatabase()
+    taskTree = TaskTree(database)
 
     # Program main loop (REPL)
     #   - Read commands from user
     #   - Evaluate commands updating database
     #   - Print current state of database
     #   - Loop until exit command 
-    TodoShell(database).cmdloop()
+    TodoShell(taskTree).cmdloop()
 
 
 def initDatabase():

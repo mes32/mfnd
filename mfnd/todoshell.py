@@ -11,7 +11,6 @@ import sys
 import sqlite3
 
 import cmdtoken
-from database import TodoDatabase
 from todotask import TodoTask
 from tasktree import TaskTree
 
@@ -48,7 +47,7 @@ class TodoShell(cmd.Cmd):
     prompt = '> '
     file = None
 
-    def __init__(self, database):
+    def __init__(self, taskTree):
         """
         Initialize a shell for todo-list commands
         """
@@ -59,8 +58,8 @@ class TodoShell(cmd.Cmd):
 
         super().__init__(completekey, stdin, stdout)
 
-        self.database = database
-        cmdtoken.CommandStack.setDatabase(database)
+        self.taskTree = taskTree
+        cmdtoken.CommandStack.setTaskTree(taskTree)
 
     def cmdloop(self):
         """
@@ -68,7 +67,7 @@ class TodoShell(cmd.Cmd):
         """
 
         try:
-            self.__printDB()
+            self.__printState()
             super().cmdloop()
         except SystemExit:
             return
@@ -122,7 +121,7 @@ class TodoShell(cmd.Cmd):
         command = cmdtoken.TodoCommand(task)
         command.execute()
 
-        self.__printDB()
+        self.__printState()
 
     def do_todosub(self, arg):
         """
@@ -137,7 +136,7 @@ class TodoShell(cmd.Cmd):
         command = cmdtoken.TodosubCommand(task, parentLabel)
         command.execute()
 
-        self.__printDB()   
+        self.__printState()   
 
     def do_done(self, arg):
         """
@@ -148,7 +147,7 @@ class TodoShell(cmd.Cmd):
         command = cmdtoken.DoneCommand(label)
         command.execute()   
 
-        self.__printDB()
+        self.__printState()
 
     def do_remove(self, arg):
         """
@@ -159,7 +158,7 @@ class TodoShell(cmd.Cmd):
         command = cmdtoken.RemoveCommand(label)
         command.execute()
 
-        self.__printDB()
+        self.__printState()
 
     def do_pumpkin(self, arg):
         """
@@ -168,7 +167,7 @@ class TodoShell(cmd.Cmd):
 
         self.database.configurePumpkinTime(arg)
 
-        self.__printDB()
+        self.__printState()
 
     def do_move(self, arg):
         """
@@ -201,7 +200,7 @@ class TodoShell(cmd.Cmd):
         #     self.default(self.lastcmd)
         #     return
 
-        self.__printDB()
+        self.__printState()
 
     def do_undo(self, arg):
         """
@@ -209,7 +208,7 @@ class TodoShell(cmd.Cmd):
         """
 
         if cmdtoken.CommandStack.undo():
-            self.__printDB()
+            self.__printState()
 
     def do_redo(self, arg):
         """
@@ -217,7 +216,7 @@ class TodoShell(cmd.Cmd):
         """
 
         if cmdtoken.CommandStack.redo():
-            self.__printDB()
+            self.__printState()
 
     def do_add(self, s):
         pass
@@ -284,7 +283,7 @@ class TodoShell(cmd.Cmd):
 
         print("    # In TodoShell __loadHistory() - doing nothing")
 
-    def __printDB(self):
+    def __printState(self):
         """
         Print the current state of the to-do list
         """
@@ -294,7 +293,6 @@ class TodoShell(cmd.Cmd):
         print( today.strftime("MFND - %B %d, %Y") )
         print()
 
-        tasks = self.database.getTasks()
-        print(tasks)
+        print(str(self.taskTree))
 
 

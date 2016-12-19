@@ -221,24 +221,24 @@ class TodoDatabase:
 
         # Insert four sample rows
         task = TodoTask("Put cover sheet on TPS report (A)")
-        self.insertTask(task)
+        self.insertTask(task, 2)
         task = TodoTask("Put cover sheet on TPS report (B)")
-        self.insertTask(task)
+        self.insertTask(task, 2)
         task = TodoTask("Put cover sheet on TPS report (C)")
-        self.insertTask(task)
+        self.insertTask(task, 2)
         task = TodoTask("Put cover sheet on TPS report (D)")
-        self.insertTask(task)
+        self.insertTask(task, 2)
 
-        task = TodoTask("Sub-task (4.1)")
-        self.insertTask(task, None, "4")
-        task = TodoTask("Sub-task (3.1)")
-        self.insertTask(task, None, "3")
-        task = TodoTask("Sub-task (3.2)")
-        self.insertTask(task, None, "3")
+        # task = TodoTask("Sub-task (4.1)")
+        # self.insertTask(task, None, "4")
+        # task = TodoTask("Sub-task (3.1)")
+        # self.insertTask(task, None, "3")
+        # task = TodoTask("Sub-task (3.2)")
+        # self.insertTask(task, None, "3")
 
-    def getTasks(self):
+    def initializeTaskTree(self, taskTree):
         """
-        Return a list of all tasks stored in the database
+        Initialize the task tree from the database
         """
 
         conn = sqlite3.connect(self.databasePath)
@@ -264,40 +264,34 @@ class TodoDatabase:
         )
         ON
             rowid = childID
-        WHERE
-            parentID >= 2
         ORDER BY
             maxDepth ASC, position ASC;
         '''
 
-        taskTree = TaskTree()
         for row in c.execute(sql):
             rowid = row[0]
             parentID = row[1]
-            newTask = TodoTask(description = row[2], position = row[3], completionStatus = row[4])
+            description = row[2]
+            position = row[3]
+            completionStatus = row[4]
             maxDepth = row[5]
-            taskTree.insert(rowid, parentID, newTask, maxDepth)
+
+            task = TodoTask(description, position, completionStatus)
+            node = TreeNode(rowid, parentID, task, maxDepth)
+            taskTree.insertNode(node)
 
         conn.commit()
         conn.close()
 
-        return taskTree
-
-    def insertTask(self, task, position=None, parentLabel=None, parentID=None):
+    def insertTask(self, task, parentID):
         """
         Insert a new task object into the database
         """
 
-        if parentID == None:
-            if parentLabel == None:
-                parentID = 2
-            else:
-                parentID = self.getTasks().getRowid(parentLabel)
-
-        if position == None:
+        if task.position == None:
             positionSQL = '(SELECT COALESCE(MAX(position), 0) FROM TodoTask WHERE parentID = ' + strSQLite(parentID) + ') + 1'
         else:
-            positionSQL = strSQLite(position)
+            positionSQL = strSQLite(task.position)
 
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
@@ -325,45 +319,49 @@ class TodoDatabase:
             rowid = row[0]
             break
 
+        sql = '''
+        SELECT position FROM TodoTask WHERE rowid = ''' + strSQLite(rowid) + ''';
+        '''
+        for row in c.execute(sql):
+            task.position = row[0]
+            break
+
         conn.commit()
         conn.close()
 
         return rowid
 
-    def insertTree(self, tree):
-        """
-        Insert a tree of task objects into the database
-        """
+    # def insertTree(self, tree):
+    #     """
+    #     Insert a tree of task objects into the database
+    #     """
 
-        self.insertTreeNode(tree.root, tree.position, tree.parentID)
+    #     self.insertTreeNode(tree.root, tree.position, tree.parentID)
 
-    def insertTreeNode(self, node, position, parentID):
+    # def insertTreeNode(self, node, position, parentID):
+    #     """
+    #     Insert a tree node into the database
+    #     """
+
+    #     rowid = self.insertTask(node.task, position, None, parentID)
+    #     childNodes = node.children
+
+    #     index = 1
+    #     for child in childNodes:
+    #         self.insertTreeNode(child, index, rowid)
+    #         index += 1
+
+    def updateCompletionStatus(self, rowid, completionStatus):
         """
-        Insert a tree node into the database
+        Update 'completionStatus' for the task entry in the database under 'rowid'
         """
-
-        rowid = self.insertTask(node.task, position, None, parentID)
-        childNodes = node.children
-
-        index = 1
-        for child in childNodes:
-            self.insertTreeNode(child, index, rowid)
-            index += 1
-
-    def doneTask(self, label):
-        """
-        Update a task entry in the database so completionStatus = 'done'
-        """
-
-        tasks = self.getTasks()
-        rowid = tasks.getRowid(label)
 
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
 
         sql = '''
         UPDATE TodoTask
-            SET completionStatus = 'done'
+            SET completionStatus = \'''' + completionStatus + '''\'
             WHERE rowid == ''' + strSQLite(rowid) + ''' ;
         '''
         c.execute(sql)
@@ -373,34 +371,10 @@ class TodoDatabase:
 
         return rowid
 
-    def todoTask(self, rowid):
-        """
-        Update a task entry in the database so completionStatus = 'todo'
-        """
-
-        conn = sqlite3.connect(self.databasePath)
-        c = conn.cursor()
-
-        sql = '''
-        UPDATE TodoTask
-            SET completionStatus = 'todo'
-            WHERE rowid == ''' + strSQLite(rowid) + ''' ;
-        '''
-        c.execute(sql)
-
-        conn.commit()
-        conn.close()
-
-        return rowid
-
-    def deleteTask(self, position, rowid=None):
+    def deleteTask(self, rowid):
         """
         Delete a task entry from the database
         """
-
-        tasks = self.getTasks()
-        if rowid == None:
-            rowid = tasks.getRowid(position)
 
         conn = sqlite3.connect(self.databasePath)
         c = conn.cursor()
@@ -413,8 +387,6 @@ class TodoDatabase:
 
         conn.commit()
         conn.close()
-
-        return tasks.getSubtree(rowid)
 
     def configurePumpkinTime(self, timeInHours):
         """
@@ -439,74 +411,74 @@ class TodoDatabase:
         print("New pumpkin time: " + timeInHours)
         print()
 
-    def moveTask(self, currPosition, newPosition):
-        """
-        Move a task in the to-do list to a new position
-        """
+    # def moveTask(self, currPosition, newPosition):
+    #     """
+    #     Move a task in the to-do list to a new position
+    #     """
 
-        task = self.getTask(currPosition)
-        # except sqlite3.Error:
-        #     # In this instance sqlite3.Error is actually non-specific
-        #     # getTask might fail for other reasons besides out of bounds error
-        #     raise self.TaskIndexException()
+    #     task = self.getTask(currPosition)
+    #     # except sqlite3.Error:
+    #     #     # In this instance sqlite3.Error is actually non-specific
+    #     #     # getTask might fail for other reasons besides out of bounds error
+    #     #     raise self.TaskIndexException()
 
-        self.deleteTask(currPosition)
-        self.insertTask(task, newPosition)
+    #     self.deleteTask(currPosition)
+    #     self.insertTask(task, newPosition)
 
-    def getTask(self, position):
-        """
-        Get a task from the to-do list based on it's position
-        """
+    # def getTask(self, position):
+    #     """
+    #     Get a task from the to-do list based on it's position
+    #     """
 
-        conn = sqlite3.connect(self.databasePath)
-        c = conn.cursor()
+    #     conn = sqlite3.connect(self.databasePath)
+    #     c = conn.cursor()
 
-        sql = '''
-        SELECT
-            description,
-            position,
-            completionStatus
-        FROM
-            TodoTask
-        WHERE
-            position = ''' + strSQLite(position) + ''';
-        '''
+    #     sql = '''
+    #     SELECT
+    #         description,
+    #         position,
+    #         completionStatus
+    #     FROM
+    #         TodoTask
+    #     WHERE
+    #         position = ''' + strSQLite(position) + ''';
+    #     '''
 
-        for row in c.execute(sql):
-            task = TodoTask(description = row[0], position = row[1], completionStatus = row[2])
-            break
-        conn.commit()
-        conn.close()
+    #     for row in c.execute(sql):
+    #         task = TodoTask(description = row[0], position = row[1], completionStatus = row[2])
+    #         break
+    #     conn.commit()
+    #     conn.close()
 
-        return task
+    #     return task
 
-    def moveUp(self, position):
-        """
-        Move a task up one position in the to-do list
-        """
+    # def moveUp(self, position):
+    #     """
+    #     Move a task up one position in the to-do list
+    #     """
 
-        self.moveTask(position, position - 1)
+    #     self.moveTask(position, position - 1)
 
-    def moveDown(self, position):
-        """
-        Move a task down one position in the to-do list
-        """
+    # def moveDown(self, position):
+    #     """
+    #     Move a task down one position in the to-do list
+    #     """
 
-        self.moveTask(position, position + 1)
+    #     self.moveTask(position, position + 1)
 
-    def moveTop(self, position):
-        """
-        Move a task to the top of the to-do list
-        """
+    # def moveTop(self, position):
+    #     """
+    #     Move a task to the top of the to-do list
+    #     """
 
-        self.moveTask(position, 1)
+    #     self.moveTask(position, 1)
 
-    def moveBottom(self, position):
-        """
-        Move a task to the bottom of the to-do list
-        """
+    # def moveBottom(self, position):
+    #     """
+    #     Move a task to the bottom of the to-do list
+    #     """
 
-        self.moveTask(position, None)
+    #     self.moveTask(position, None)
 
     def __getLastPumpkinTime(self, pumpkinTime):
         """
