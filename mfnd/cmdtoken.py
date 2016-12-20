@@ -94,7 +94,7 @@ class TodoCommand:
         Undo this command
         """
 
-        CommandStack.taskTree.deleteNode(self.rowid)
+        CommandStack.taskTree.deleteTask(self.rowid)
 
 class TodosubCommand:
     """
@@ -161,7 +161,7 @@ class RemoveCommand:
         """
 
         self.rowid = CommandStack.taskTree.lookupRowid(self.label)
-        self.subtree = CommandStack.taskTree.deleteNode(self.rowid)
+        self.subtree = CommandStack.taskTree.deleteTask(self.rowid)
         CommandStack.push(self, inredo)
 
     def undo(self):

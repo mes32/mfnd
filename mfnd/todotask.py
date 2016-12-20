@@ -11,7 +11,10 @@ class TodoTask:
     Class represents a task in the to-do list
     """
 
-    def __init__(self, description, position = None, completionStatus = 'todo'):
+    TASK_DONE = 'done'
+    TASK_UNDONE = 'todo'
+
+    def __init__(self, description, position=None, completionStatus=TASK_UNDONE):
         """
         Initialize a to-do list task item
         """

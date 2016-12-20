@@ -13,45 +13,36 @@ class TaskTree:
     Represents the to-do list and manages tree-like structure
     """
 
-    TASK_DONE = 'done'
-    TASK_UNDONE = 'todo'
-
     def __init__(self, database):
         """
         Initialize a to-do list task tree
         """
 
+        # TODO: nodeTable should be indexed by label
+        # Any functions that take rowid should take label
+
+        self.database = database
+        self.readDatabase()
+
+    def readDatabase(self):
+
         self.nodeTable = dict()
         self.root = None
         self.mode = None
-        self.database = database
         self.database.initializeTaskTree(self)
 
-    def insertTask(self, task, parentLabel=None, parentID=None):
+    def insertTask(self, task, parentLabel=None):
 
-        if parentID == None:
-            if parentLabel == None:
-                parentID = self.mode.rowid
-            else:
-                parentID = self.lookupRowid(parentLabel)
+        if parentLabel == None:
+            parentID = self.mode.rowid
+        else:
+            parentID = self.lookupRowid(parentLabel)
 
         rowid = self.database.insertTask(task, parentID)
         node = TreeNode(rowid, parentID, task)
         self.insertNode(node)
 
         return rowid
-
-    def insertSubtree(self, subtree):
-        parentID = subtree.root.parentID
-        self.__recusiveInsertTree(subtree.root, parentID)
-
-    def __recusiveInsertTree(self, node, parentID):
-        task = node.task
-        self.insertTask(node.task, None, parentID)
-
-        rowid = node.rowid
-        for childNode in node.children:
-            self.__recusiveInsertTree(childNode, rowid)
 
     def insertNode(self, node):
         """
@@ -71,27 +62,13 @@ class TaskTree:
             self.nodeTable[node.parentID].addChild(node)
             node.depth = self.nodeTable[node.parentID].depth + 1
 
-    def deleteNode(self, rowid):
+    def deleteTask(self, rowid):
         """
         Delete a task from the tree
         """
 
-        subtree = self.__getSubtree(rowid)
-        print("deleteNode()")
-
-        node = self.nodeTable[rowid]
-        parentID = node.parentID
-        parentNode = self.nodeTable[parentID]
-        parentNode.children.remove(node)
-
-        for childNode in self.nodeTable[rowid].children:
-            deleteNode(childNode.rowid)
-
-        del self.nodeTable[rowid]
-
         self.database.deleteTask(rowid)
-
-        return subtree
+        self.readDatabase()
 
     def lookupRowid(self, label):
         """
@@ -105,41 +82,21 @@ class TaskTree:
 
         return -1
 
-    def __getSubtree(self, rootID):
-        """
-        Return a sub-tree of this tree based on the root node's rowid
-        """
-
-        root = self.nodeTable[rootID]
-        subtree = TaskTree(self.database)
-        subtree.__recursiveCopy(root)
-        return subtree
-
-    def __recursiveCopy(self, node):
-        print("__recursiveCopy() " + node.task.description)
-        copyNode = node.copy()
-        self.insertNode(copyNode)
-
-        for childNode in node.children:
-            self.__recursiveCopy(childNode)
-
     def setDone(self, rowid):
         """
         Mark the task at rowid as done
         """
 
-        node = self.nodeTable[rowid]
-        node.task.completionStatus = TaskTree.TASK_DONE
-        self.database.updateCompletionStatus(rowid, node.task.completionStatus)
+        self.database.updateCompletionStatus(rowid, TodoTask.TASK_DONE)
+        self.readDatabase()
 
     def setUndone(self, rowid):
         """
         Mark the task at rowid as undone
         """
 
-        node = self.nodeTable[rowid]
-        node.task.completionStatus = TaskTree.TASK_UNDONE
-        self.database.updateCompletionStatus(rowid, node.task.completionStatus)
+        self.database.updateCompletionStatus(rowid, TodoTask.TASK_UNDONE)
+        self.readDatabase()
 
     def __str__(self):
         """
@@ -182,12 +139,6 @@ class TreeNode:
             else:
                 childNode.label = self.label + str(childNode.task.position) + "."
 
-    def copy(self):
-
-        copyNode = TreeNode(self.rowid, self.parentID, self.task, self.depth)
-        return copyNode
-
-
     def __str__(self):
         return "[-- TreeNode --]"
 
@@ -214,7 +165,7 @@ class TreeNode:
         outputStr = "  " * level
 
         if level > 0:
-            if self.task.completionStatus == TaskTree.TASK_DONE:
+            if self.task.completionStatus == TodoTask.TASK_DONE:
                 outputStr += "--- " + self.task.description + " ---\n"
             else:
                 outputStr += " " + self.label + " " + self.task.description + "\n"
