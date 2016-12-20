@@ -229,12 +229,12 @@ class TodoDatabase:
         task = TodoTask("Put cover sheet on TPS report (D)")
         self.insertTask(task, 2)
 
-        # task = TodoTask("Sub-task (4.1)")
-        # self.insertTask(task, None, "4")
-        # task = TodoTask("Sub-task (3.1)")
-        # self.insertTask(task, None, "3")
-        # task = TodoTask("Sub-task (3.2)")
-        # self.insertTask(task, None, "3")
+        task = TodoTask("Sub-task (4.a)")
+        self.insertTask(task, 6)
+        task = TodoTask("Sub-task (3.a)")
+        self.insertTask(task, 5)
+        task = TodoTask("Sub-task (3.b)")
+        self.insertTask(task, 5)
 
     def initializeTaskTree(self, taskTree):
         """

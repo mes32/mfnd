@@ -5,6 +5,8 @@ Module for the to-do list tree
 
 """
 
+import copy
+
 from todotask import TodoTask 
 
 
@@ -67,8 +69,23 @@ class TaskTree:
         Delete a task from the tree
         """
 
+        node = self.nodeTable[rowid]
+        trace = list()
+        TreeNode.setTrace(node, trace)
+
         self.database.deleteTask(rowid)
-        self.readDatabase()
+        #self.readDatabase()
+
+        return trace
+
+    def insertTrace(self, trace):
+
+        for node in trace:
+            task = node.task
+            label = node.label
+            if label == "":
+                label = None
+            self.insertTask(node.task, label)
 
     def lookupRowid(self, label):
         """
@@ -88,7 +105,6 @@ class TaskTree:
         """
 
         self.database.updateCompletionStatus(rowid, TodoTask.TASK_DONE)
-        self.readDatabase()
 
     def setUndone(self, rowid):
         """
@@ -96,12 +112,13 @@ class TaskTree:
         """
 
         self.database.updateCompletionStatus(rowid, TodoTask.TASK_UNDONE)
-        self.readDatabase()
 
     def __str__(self):
         """
         Return a human readable str representation of this tree
         """
+
+        self.readDatabase()
 
         if self.root == None:
             return "[Empty Task Tree]"
@@ -157,6 +174,14 @@ class TreeNode:
 
         return -1
 
+    def setTrace(node, trace):
+
+        copyNode = copy.deepcopy(node)
+        trace.append(copyNode)
+
+        for childNode in node.children:
+            TreeNode.setTrace(childNode, trace)
+
     def toString(self, level=0):
         """
         Return a human readable str representation of this node
@@ -187,3 +212,10 @@ class TreeNode:
         outputStr = TreeNode.__charPos(num) + outputStr
 
         return outputStr
+
+class NodeTrace:
+
+    def __init__(self, root):
+
+        self.trace = []
+

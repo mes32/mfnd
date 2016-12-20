@@ -161,7 +161,7 @@ class RemoveCommand:
         """
 
         self.rowid = CommandStack.taskTree.lookupRowid(self.label)
-        self.subtree = CommandStack.taskTree.deleteTask(self.rowid)
+        self.trace = CommandStack.taskTree.deleteTask(self.rowid)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -169,4 +169,4 @@ class RemoveCommand:
         Undo this command
         """
 
-        CommandStack.taskTree.insertSubtree(self.subtree)
+        CommandStack.taskTree.insertTrace(self.trace)
