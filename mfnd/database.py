@@ -219,23 +219,6 @@ class TodoDatabase:
         conn.commit()
         conn.close()
 
-        # Insert four sample rows
-        task = TodoTask("Put cover sheet on TPS report (A)")
-        self.insertTask(task, 2)
-        task = TodoTask("Put cover sheet on TPS report (B)")
-        self.insertTask(task, 2)
-        task = TodoTask("Put cover sheet on TPS report (C)")
-        self.insertTask(task, 2)
-        task = TodoTask("Put cover sheet on TPS report (D)")
-        self.insertTask(task, 2)
-
-        task = TodoTask("Sub-task (4.a)")
-        self.insertTask(task, 6)
-        task = TodoTask("Sub-task (3.a)")
-        self.insertTask(task, 5)
-        task = TodoTask("Sub-task (3.b)")
-        self.insertTask(task, 5)
-
     def initializeTaskTree(self, taskTree):
         """
         Initialize the task tree from the database

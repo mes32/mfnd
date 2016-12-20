@@ -41,6 +41,8 @@ class TaskTree:
             parentID = self.lookupRowid(parentLabel)
 
         rowid = self.database.insertTask(task, parentID)
+        self.readDatabase()
+
         node = TreeNode(rowid, parentID, task)
         self.insertNode(node)
 
@@ -70,21 +72,19 @@ class TaskTree:
         """
 
         node = self.nodeTable[rowid]
-        trace = list()
-        TreeNode.setTrace(node, trace)
+        parentLabel = self.nodeTable[node.parentID].label
+        trace = NodeTrace(node, parentLabel)
 
         self.database.deleteTask(rowid)
-        #self.readDatabase()
 
         return trace
 
-    def insertTrace(self, trace):
+    def insertTrace(self, nodeTrace):
 
-        for node in trace:
-            task = node.task
-            label = node.label
-            if label == "":
-                label = None
+        for n in nodeTrace.list:
+            node = n[0]
+            label = n[1]
+            
             self.insertTask(node.task, label)
 
     def lookupRowid(self, label):
@@ -174,14 +174,6 @@ class TreeNode:
 
         return -1
 
-    def setTrace(node, trace):
-
-        copyNode = copy.deepcopy(node)
-        trace.append(copyNode)
-
-        for childNode in node.children:
-            TreeNode.setTrace(childNode, trace)
-
     def toString(self, level=0):
         """
         Return a human readable str representation of this node
@@ -215,7 +207,19 @@ class TreeNode:
 
 class NodeTrace:
 
-    def __init__(self, root):
+    def __init__(self, root, parentLabel):
 
-        self.trace = []
+        self.list = list()
+        self.add(root, parentLabel)
+
+    def add(self, node, label):
+
+        copyNode = copy.deepcopy(node)
+        if label == "":
+            label = None   
+        self.list.append( (copyNode, label) )
+
+        label = node.label
+        for childNode in node.children:
+            self.add(childNode, label)
 
