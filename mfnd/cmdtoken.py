@@ -86,7 +86,7 @@ class TodoCommand:
         Execute this command
         """
 
-        self.rowid = CommandStack.taskTree.insertTask(self.task)
+        self.label = CommandStack.taskTree.insertTask(self.task)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -94,7 +94,7 @@ class TodoCommand:
         Undo this command
         """
 
-        CommandStack.taskTree.deleteTask(self.rowid)
+        CommandStack.taskTree.deleteTask(self.label)
 
 class TodosubCommand:
     """
@@ -111,7 +111,7 @@ class TodosubCommand:
         Execute this command
         """
 
-        self.rowid = CommandStack.taskTree.insertTask(self.task, self.parentLabel)
+        self.label = CommandStack.taskTree.insertTask(self.task, self.parentLabel)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -119,7 +119,7 @@ class TodosubCommand:
         Undo this command
         """
 
-        CommandStack.taskTree.deleteTask(self.rowid)
+        CommandStack.taskTree.deleteTask(self.label)
 
 class DoneCommand:
     """
@@ -135,8 +135,7 @@ class DoneCommand:
         Execute this command
         """
 
-        self.rowid = CommandStack.taskTree.lookupRowid(self.label)
-        CommandStack.taskTree.setDone(self.rowid)
+        CommandStack.taskTree.setDone(self.label)
         CommandStack.push(self, inredo)
 
     def undo(self):
@@ -144,7 +143,7 @@ class DoneCommand:
         Undo this command
         """
 
-        CommandStack.taskTree.setUndone(self.rowid)
+        CommandStack.taskTree.setUndone(self.label)
 
 class RemoveCommand:
     """
@@ -160,8 +159,7 @@ class RemoveCommand:
         Execute this command
         """
 
-        self.rowid = CommandStack.taskTree.lookupRowid(self.label)
-        self.trace = CommandStack.taskTree.deleteTask(self.rowid)
+        self.trace = CommandStack.taskTree.deleteTask(self.label)
         CommandStack.push(self, inredo)
 
     def undo(self):

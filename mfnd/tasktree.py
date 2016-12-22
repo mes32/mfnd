@@ -42,11 +42,12 @@ class TaskTree:
 
         rowid = self.database.insertTask(task, parentID)
         self.readDatabase()
+        label = self.lookupLabel(rowid)
 
         node = TreeNode(rowid, parentID, task)
         self.insertNode(node)
 
-        return rowid
+        return label
 
     def insertNode(self, node):
         """
@@ -66,11 +67,12 @@ class TaskTree:
             self.nodeTable[node.parentID].addChild(node)
             node.depth = self.nodeTable[node.parentID].depth + 1
 
-    def deleteTask(self, rowid):
+    def deleteTask(self, label):
         """
         Delete a task from the tree
         """
 
+        rowid = self.lookupRowid(label)
         node = self.nodeTable[rowid]
         parentLabel = self.nodeTable[node.parentID].label
         trace = NodeTrace(node, parentLabel)
@@ -81,18 +83,18 @@ class TaskTree:
 
     def insertTrace(self, nodeTrace):
 
-        rowidUnset = True
+        labelUnset = True
 
         for n in nodeTrace.list:
             node = n[0]
             label = n[1]
             
-            curr = self.insertTask(node.task, label)
+            currLabel = self.insertTask(node.task, label)
 
-            if rowidUnset:
-                rowid = curr
+            if labelUnset:
+                rootLabel = currLabel
 
-        return rowid
+        return rootLabel
 
     def lookupRowid(self, label):
         """
@@ -113,18 +115,20 @@ class TaskTree:
 
         return self.nodeTable[rowid].label
 
-    def setDone(self, rowid):
+    def setDone(self, label):
         """
-        Mark the task at rowid as done
+        Mark the task at label as done
         """
 
+        rowid = self.lookupRowid(label)
         self.database.updateCompletionStatus(rowid, TodoTask.TASK_DONE)
 
-    def setUndone(self, rowid):
+    def setUndone(self, label):
         """
         Mark the task at rowid as undone
         """
 
+        rowid = self.lookupRowid(label)
         self.database.updateCompletionStatus(rowid, TodoTask.TASK_UNDONE)
 
     def moveTaskUp(self, label):
@@ -140,10 +144,9 @@ class TaskTree:
             root.task.position -= 1
 
         self.readDatabase()
-        newRowid = self.insertTrace(trace)
+        newLabel = self.insertTrace(trace)
 
-        self.readDatabase()
-        return self.lookupLabel(newRowid)
+        return newLabel
 
     def moveTaskDown(self, label):
         """
@@ -158,10 +161,9 @@ class TaskTree:
         # TODO: Should check if at bottom already
 
         self.readDatabase()
-        newRowid = self.insertTrace(trace)
+        newLabel = self.insertTrace(trace)
 
-        self.readDatabase()
-        return self.lookupLabel(newRowid)
+        return newLabel
 
     def moveTask(self, label, position):
         """
@@ -180,8 +182,7 @@ class TaskTree:
         root.task.position = position
 
         self.readDatabase()
-        newRowid = self.insertTrace(trace)
-        newLabel = self.lookupLabel(newRowid)
+        newLabel = self.insertTrace(trace)
         self.readDatabase()
 
         print("newLabel = " + newLabel)
