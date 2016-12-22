@@ -170,3 +170,97 @@ class RemoveCommand:
         """
 
         CommandStack.taskTree.insertTrace(self.trace)
+
+class MoveUpCommand:
+    """
+    Class for 'move up' commands in todoshell
+    """
+
+    def __init__(self, label):
+
+        self.label = label
+
+    def execute(self, inredo=False):
+        """
+        Execute this command
+        """
+
+        self.newLabel = CommandStack.taskTree.moveTaskUp(self.label)
+        CommandStack.push(self, inredo)
+
+    def undo(self):
+        """
+        Undo this command
+        """
+
+        CommandStack.taskTree.moveTaskDown(self.newLabel)
+
+class MoveDownCommand:
+    """
+    Class for 'move down' commands in todoshell
+    """
+
+    def __init__(self, label):
+
+        self.label = label
+
+    def execute(self, inredo=False):
+        """
+        Execute this command
+        """
+
+        self.newLabel = CommandStack.taskTree.moveTaskDown(self.label)
+        CommandStack.push(self, inredo)
+
+    def undo(self):
+        """
+        Undo this command
+        """
+
+        CommandStack.taskTree.moveTaskUp(self.newLabel)
+
+class MoveTopCommand:
+    """
+    Class for 'move top' commands in todoshell
+    """
+
+    def __init__(self, label):
+
+        self.label = label
+
+    def execute(self, inredo=False):
+        """
+        Execute this command
+        """
+
+        (self.newLabel, self.oldPosition) = CommandStack.taskTree.moveTask(self.label, 1)
+        CommandStack.push(self, inredo)
+
+    def undo(self):
+        """
+        Undo this command
+        """
+
+        CommandStack.taskTree.moveTask(self.newLabel, self.oldPosition)
+
+class MoveBottomCommand:
+    """
+    Class for 'move bottom' commands in todoshell
+    """
+
+    def __init__(self, label):
+
+        self.label = label
+
+    def execute(self, inredo=False):
+        """
+        Execute this command
+        """
+
+        # self.newLabel = CommandStack.taskTree.moveTaskBottom(self.label)
+        # CommandStack.push(self, inredo)
+
+    def undo(self):
+        """
+        Undo this command
+        """

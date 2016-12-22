@@ -271,6 +271,13 @@ class TodoDatabase:
         Insert a new task object into the database
         """
 
+        ########
+        if task.position == None:
+            print("insertTask() position = None")
+        else:
+            print("insertTask() position = " + str(task.position))
+        ########
+
         if task.position == None:
             positionSQL = '(SELECT COALESCE(MAX(position), 0) FROM TodoTask WHERE parentID = ' + strSQLite(parentID) + ') + 1'
         else:
@@ -393,75 +400,6 @@ class TodoDatabase:
 
         print("New pumpkin time: " + timeInHours)
         print()
-
-    # def moveTask(self, currPosition, newPosition):
-    #     """
-    #     Move a task in the to-do list to a new position
-    #     """
-
-    #     task = self.getTask(currPosition)
-    #     # except sqlite3.Error:
-    #     #     # In this instance sqlite3.Error is actually non-specific
-    #     #     # getTask might fail for other reasons besides out of bounds error
-    #     #     raise self.TaskIndexException()
-
-    #     self.deleteTask(currPosition)
-    #     self.insertTask(task, newPosition)
-
-    # def getTask(self, position):
-    #     """
-    #     Get a task from the to-do list based on it's position
-    #     """
-
-    #     conn = sqlite3.connect(self.databasePath)
-    #     c = conn.cursor()
-
-    #     sql = '''
-    #     SELECT
-    #         description,
-    #         position,
-    #         completionStatus
-    #     FROM
-    #         TodoTask
-    #     WHERE
-    #         position = ''' + strSQLite(position) + ''';
-    #     '''
-
-    #     for row in c.execute(sql):
-    #         task = TodoTask(description = row[0], position = row[1], completionStatus = row[2])
-    #         break
-    #     conn.commit()
-    #     conn.close()
-
-    #     return task
-
-    # def moveUp(self, position):
-    #     """
-    #     Move a task up one position in the to-do list
-    #     """
-
-    #     self.moveTask(position, position - 1)
-
-    # def moveDown(self, position):
-    #     """
-    #     Move a task down one position in the to-do list
-    #     """
-
-    #     self.moveTask(position, position + 1)
-
-    # def moveTop(self, position):
-    #     """
-    #     Move a task to the top of the to-do list
-    #     """
-
-    #     self.moveTask(position, 1)
-
-    # def moveBottom(self, position):
-    #     """
-    #     Move a task to the bottom of the to-do list
-    #     """
-
-    #     self.moveTask(position, None)
 
     def __getLastPumpkinTime(self, pumpkinTime):
         """

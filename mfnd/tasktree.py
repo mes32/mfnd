@@ -81,11 +81,18 @@ class TaskTree:
 
     def insertTrace(self, nodeTrace):
 
+        rowidUnset = True
+
         for n in nodeTrace.list:
             node = n[0]
             label = n[1]
             
-            self.insertTask(node.task, label)
+            curr = self.insertTask(node.task, label)
+
+            if rowidUnset:
+                rowid = curr
+
+        return rowid
 
     def lookupRowid(self, label):
         """
@@ -98,6 +105,13 @@ class TaskTree:
             return rowid
 
         return -1
+
+    def lookupLabel(self, rowid):
+        """
+        Lookup a task's label based on its rowid in the database
+        """
+
+        return self.nodeTable[rowid].label
 
     def setDone(self, rowid):
         """
@@ -112,6 +126,68 @@ class TaskTree:
         """
 
         self.database.updateCompletionStatus(rowid, TodoTask.TASK_UNDONE)
+
+    def moveTaskUp(self, label):
+        """
+        Move a task up one position
+        """
+
+        rowid = self.lookupRowid(label)
+        trace = self.deleteTask(rowid)
+        root = trace.list[0][0]
+
+        if root.task.position > 1:
+            root.task.position -= 1
+
+        self.readDatabase()
+        newRowid = self.insertTrace(trace)
+
+        self.readDatabase()
+        return self.lookupLabel(newRowid)
+
+    def moveTaskDown(self, label):
+        """
+        Move a task down one position
+        """
+
+        rowid = self.lookupRowid(label)
+        trace = self.deleteTask(rowid)
+        root = trace.list[0][0]
+
+        root.task.position += 1
+        # TODO: Should check if at bottom already
+
+        self.readDatabase()
+        newRowid = self.insertTrace(trace)
+
+        self.readDatabase()
+        return self.lookupLabel(newRowid)
+
+    def moveTask(self, label, position):
+        """
+        Move a task to a new position
+        """
+
+        print("label = " + label)
+        print("position = " + str(position))
+
+
+        rowid = self.lookupRowid(label)
+        trace = self.deleteTask(rowid)
+        root = trace.list[0][0]
+
+        oldPosition = root.task.position
+        root.task.position = position
+
+        self.readDatabase()
+        newRowid = self.insertTrace(trace)
+        newLabel = self.lookupLabel(newRowid)
+        self.readDatabase()
+
+        print("newLabel = " + newLabel)
+        print("oldPosition = " + str(oldPosition))
+
+        return (newLabel, oldPosition)
 
     def __str__(self):
         """
@@ -209,6 +285,7 @@ class NodeTrace:
 
     def __init__(self, root, parentLabel):
 
+        self.root = root
         self.list = list()
         self.add(root, parentLabel)
 

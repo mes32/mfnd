@@ -179,17 +179,21 @@ class TodoShell(cmd.Cmd):
             self.default(self.lastcmd)
             return
 
-        label = int(tokens[0])
+        label = tokens[0]
         direction = tokens[1]
 
         if direction == 'up':
-            self.database.moveUp(label)
+            command = cmdtoken.MoveUpCommand(label)
+            command.execute()
         elif direction == 'down':
-            self.database.moveDown(label)
+            command = cmdtoken.MoveDownCommand(label)
+            command.execute()
         elif direction == 'top':
-            self.database.moveTop(label)
+            command = cmdtoken.MoveTopCommand(label)
+            command.execute()
         elif direction == 'bottom':
-            self.database.moveBottom(label)
+            command = cmdtoken.MoveBottomCommand(label)
+            command.execute()
         else:
             self.default(self.lastcmd)
             return
